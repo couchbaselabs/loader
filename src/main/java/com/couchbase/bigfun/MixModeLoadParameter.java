@@ -10,17 +10,18 @@ public class MixModeLoadParameter extends LoadParameter {
     public int updatePropotion;
     public int deletePropotion;
     public int ttlPropotion;
+    public int queryPropotion;
     public MixModeInsertParameter insertParameter;
     public MixModeDeleteParameter deleteParameter;
     public MixModeTTLParameter ttlParameter;
     public MixModeLoadParameter(int intervalMS, int durationSeconds, Date startTime,
                                 int insertPropotion, int updatePropotion,
-                                int deletePropotion, int ttlPropotion,
-                                DataInfo dataInfo, TargetInfo targetInfo,
+                                int deletePropotion, int ttlPropotion, int queryPropotion,
+                                DataInfo dataInfo, TargetInfo targetInfo, QueryInfo queryInfo,
                                 MixModeInsertParameter insertParameter, MixModeDeleteParameter deleteParameter,
                                 MixModeTTLParameter ttlParameter)
     {
-        super(dataInfo, targetInfo);
+        super(dataInfo, targetInfo, queryInfo);
         this.intervalMS = intervalMS;
         this.durationSeconds = durationSeconds;
         this.startTime = startTime;
@@ -28,6 +29,7 @@ public class MixModeLoadParameter extends LoadParameter {
         this.updatePropotion = updatePropotion;
         this.deletePropotion = deletePropotion;
         this.ttlPropotion = ttlPropotion;
+        this.queryPropotion = queryPropotion;
         this.insertParameter = insertParameter;
         this.deleteParameter = deleteParameter;
         this.ttlParameter = ttlParameter;
@@ -49,6 +51,7 @@ public class MixModeLoadParameter extends LoadParameter {
                 (updatePropotion == c.updatePropotion) &&
                 (deletePropotion == c.deletePropotion) &&
                 (ttlPropotion == c.ttlPropotion) &&
+                (queryPropotion == c.queryPropotion) &&
                 insertParameter.equals(c.insertParameter) &&
                 deleteParameter.equals(c.deleteParameter) &&
                 ttlParameter.equals(c.ttlParameter);

@@ -121,12 +121,13 @@ public class BatchModeLoadParametersGeneratorEntry extends LoadParametersGenerat
 
         DataInfo allPartitionDataInfos[] = getAllPartitionDataInfos();
         TargetInfo targetInfo = getTargetInfo();
+        QueryInfo queryInfo = getQueryInfo();
         BatchModeUpdateParameter updateParameter = getUpdateParameter();
         BatchModeTTLParameter ttlParameter = getTTLParameter();
         BatchModeLoadParameters batchModeLoadParameters = new BatchModeLoadParameters();
         for (int i = 0; i < allPartitionDataInfos.length; i++) {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(
-                    allPartitionDataInfos[i], targetInfo,
+                    allPartitionDataInfos[i], targetInfo, queryInfo,
                     (String) arguments.get("operation"), updateParameter, ttlParameter);
             batchModeLoadParameters.loadParameters.add(batchModeLoadParameter);
         }

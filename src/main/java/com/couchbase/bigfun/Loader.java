@@ -11,6 +11,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
         public static final String DELETE_OPERATION = "delete";
         public static final String UPDATE_OPERATION = "update";
         public static final String TTL_OPERATION = "ttl";
+        public static final String QUERY_OPERATION = "query";
 
         private LoadData data;
 
@@ -73,9 +74,36 @@ public class Loader<PARAMT, DATAT> extends Thread {
                 case TTL_OPERATION:
                     result = this.ttl();
                     break;
+                case QUERY_OPERATION:
+                    result = this.query();
+                    break;
                 default:
                     result = false;
                     break;
+            }
+            return result;
+        }
+
+        private boolean query() {
+            boolean result;
+            Date start = new Date();
+            try {
+                String query = data.GetNextQuery();
+                if (query != null) {
+                    this.target.cbasQuery(query);
+                    Date end = new Date();
+                    this.successStats.queryNumber++;
+                    this.successStats.queryLatency += end.getTime() - start.getTime();
+                    result = true;
+                }
+                else
+                    result = false;
+            }
+            catch (Exception e) {
+                Date end = new Date();
+                this.failedStats.queryNumber++;
+                this.failedStats.queryLatency += end.getTime() - start.getTime();
+                throw e;
             }
             return result;
         }
@@ -91,11 +119,9 @@ public class Loader<PARAMT, DATAT> extends Thread {
                     this.successStats.ttlNumber++;
                     this.successStats.ttlLatency += end.getTime() - start.getTime();
                     result = true;
-                }
-                else
+                } else
                     result = false;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Date end = new Date();
                 this.failedStats.ttlNumber++;
                 this.failedStats.ttlLatency += end.getTime() - start.getTime();

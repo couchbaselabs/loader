@@ -60,19 +60,21 @@ public class MixModeLoader extends Loader<MixModeLoadParameter, MixModeLoadData>
     }
 
     public MixModeLoader(MixModeLoadParameter loadParameter) {
-        super(loadParameter, new MixModeLoadData(loadParameter.dataInfo, loadParameter.insertParameter,
-                loadParameter.deleteParameter, loadParameter.ttlParameter));
+        super(loadParameter, new MixModeLoadData(loadParameter.dataInfo, loadParameter.queryInfo,
+                loadParameter.insertParameter, loadParameter.deleteParameter, loadParameter.ttlParameter));
 
         String operations[] = {
                 INSERT_OPERATION,
                 DELETE_OPERATION,
                 UPDATE_OPERATION,
-                TTL_OPERATION};
+                TTL_OPERATION,
+                QUERY_OPERATION};
         int operationPropotions[] = {
                 this.getParameter().insertPropotion,
                 this.getParameter().deletePropotion,
                 this.getParameter().updatePropotion,
-                this.getParameter().ttlPropotion};
+                this.getParameter().ttlPropotion,
+                this.getParameter().queryPropotion};
         this.operationRandomizer = new RandomCategoryGen(operations, operationPropotions);
     }
 }

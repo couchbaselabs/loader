@@ -5,6 +5,7 @@ import com.couchbase.client.java.document.json.JsonObject;
 
 import java.io.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import java.io.BufferedReader;
@@ -36,6 +37,8 @@ public class MixModeLoadData extends LoadData {
     private int expiryEnd;
 
     private HashSet<String> removedKeys = new HashSet<String>();
+
+    private ArrayList<String> queries = new ArrayList<String>();
 
     public long getRemovedKeysNumber() {return this.removedKeys.size();}
 
@@ -108,13 +111,23 @@ public class MixModeLoadData extends LoadData {
     }
 
     @Override
+    public String GetNextQuery() {
+        String query = null;
+        if (this.queries.size() > 0) {
+            int qidx = random.nextInt(this.queries.size());
+            query = this.queries.get(qidx);
+        }
+        return query;
+    }
+
+    @Override
     public void close() {
         return;
     }
 
-    public MixModeLoadData(DataInfo dataInfo, MixModeInsertParameter insertParam,
+    public MixModeLoadData(DataInfo dataInfo, QueryInfo queryInfo, MixModeInsertParameter insertParam,
                            MixModeDeleteParameter delParam, MixModeTTLParameter ttlParameter) {
-        super(dataInfo);
+        super(dataInfo, queryInfo);
         this.insertParam = insertParam;
         this.delParam = delParam;
         this.ttlParameter = ttlParameter;
@@ -164,6 +177,10 @@ public class MixModeLoadData extends LoadData {
         catch (IOException e)
         {
             throw new IllegalArgumentException("Invalid data file path");
+        }
+
+        for (String query : queryInfo.queries) {
+            this.queries.add(query);
         }
     }
 }

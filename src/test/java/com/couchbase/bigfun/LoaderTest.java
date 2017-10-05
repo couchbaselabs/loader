@@ -61,6 +61,7 @@ public class LoaderTest
         assertTrue(p.updatePropotion == 9);
         assertTrue(p.deletePropotion == 10);
         assertTrue(p.ttlPropotion == 11);
+        assertTrue(p.queryPropotion == 12);
         assertTrue(p.dataInfo.dataFilePath.equals("datafilepath"));
         assertTrue(p.dataInfo.metaFilePath.equals("metafilepath"));
         assertTrue(p.dataInfo.keyFieldName.equals("keyfieldname"));
@@ -69,6 +70,10 @@ public class LoaderTest
         assertTrue(p.targetInfo.bucket.equals("bucket"));
         assertTrue(p.targetInfo.username.equals("username"));
         assertTrue(p.targetInfo.password.equals("password"));
+        assertTrue(p.targetInfo.cbashost.equals("cbashost"));
+        assertTrue(p.queryInfo.queries.size() == 2);
+        assertTrue(p.queryInfo.queries.get(0).equals("select 1;"));
+        assertTrue(p.queryInfo.queries.get(1).equals("select 2;"));
         assertTrue(p.insertParameter.insertIdStart == 2);
         assertTrue(p.deleteParameter.maxDeleteIds == 3);
         assertTrue(p.ttlParameter.expiryStart == 4);
@@ -77,14 +82,17 @@ public class LoaderTest
 
     public void testMixModeLoadParameters() {
         DataInfo dataInfo = new DataInfo("datafilepath", "metafilepath",  "keyfieldname", 1);
-        TargetInfo targetInfo = new TargetInfo("host", "bucket", "username", "password");
+        TargetInfo targetInfo = new TargetInfo("host", "bucket", "username", "password", "cbashost");
         MixModeInsertParameter insertParameter = new MixModeInsertParameter(2);
         MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(3);
         MixModeTTLParameter ttlParameter = new MixModeTTLParameter(4, 5);
         Date date = new Date((new Date()).getTime() / 1000 * 1000);
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
         MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(6, 7, date,
-                8, 9, 10, 11,
-                dataInfo, targetInfo, insertParameter, deleteParameter, ttlParameter);
+                8, 9, 10, 11, 12,
+                dataInfo, targetInfo, queryInfo, insertParameter, deleteParameter, ttlParameter);
         MixModeLoadParameters mixModeLoadParameters = new MixModeLoadParameters();
         mixModeLoadParameters.loadParameters.add(mixModeLoadParameter);
         mixModeLoadParameters.loadParameters.add(mixModeLoadParameter);
@@ -111,11 +119,26 @@ public class LoaderTest
         assertTrue(batchModeLoadParameter.updateParameter.updateValueEnd.equals(updateValueEnd));
         assertTrue(batchModeLoadParameter.updateParameter.updateValueFormat.equals(updateValueFormat));
         assertTrue(batchModeLoadParameter.updateParameter.updateValuesFilePath.equals(updateValuesFilePath));
+        assertTrue(batchModeLoadParameter.dataInfo.dataFilePath.equals("datafilepath"));
+        assertTrue(batchModeLoadParameter.dataInfo.metaFilePath.equals("metafilepath"));
+        assertTrue(batchModeLoadParameter.dataInfo.keyFieldName.equals("keyfieldname"));
+        assertTrue(batchModeLoadParameter.dataInfo.docsToLoad == 1);
+        assertTrue(batchModeLoadParameter.targetInfo.host.equals("host"));
+        assertTrue(batchModeLoadParameter.targetInfo.bucket.equals("bucket"));
+        assertTrue(batchModeLoadParameter.targetInfo.username.equals("username"));
+        assertTrue(batchModeLoadParameter.targetInfo.password.equals("password"));
+        assertTrue(batchModeLoadParameter.targetInfo.cbashost.equals("cbashost"));
+        assertTrue(batchModeLoadParameter.queryInfo.queries.size() == 2);
+        assertTrue(batchModeLoadParameter.queryInfo.queries.get(0).equals("select 1;"));
+        assertTrue(batchModeLoadParameter.queryInfo.queries.get(1).equals("select 2;"));
     }
 
     public void testBatchModeLoadParameters() {
         DataInfo dataInfo = new DataInfo("datafilepath", "metafilepath",  "keyfieldname", 1);
-        TargetInfo targetInfo = new TargetInfo("host", "bucket", "username", "password");
+        TargetInfo targetInfo = new TargetInfo("host", "bucket", "username", "password", "cbashost");
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
         Date date = new Date((new Date()).getTime() / 1000 * 1000);
         BatchModeUpdateParameter updateParameter1 = new BatchModeUpdateParameter("updatefieldname", "integer",
                 "1", "2");
@@ -124,9 +147,9 @@ public class LoaderTest
         BatchModeUpdateParameter updateParameter3 = new BatchModeUpdateParameter("updatefieldname", "string",
                 "updatevalueformat", "3", "4");
         BatchModeTTLParameter ttlParameter = new BatchModeTTLParameter(5, 6);
-        BatchModeLoadParameter batchModeLoadParameter1 = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", updateParameter1, ttlParameter);
-        BatchModeLoadParameter batchModeLoadParameter2 = new BatchModeLoadParameter(dataInfo, targetInfo, "update", updateParameter2, ttlParameter);
-        BatchModeLoadParameter batchModeLoadParameter3 = new BatchModeLoadParameter(dataInfo, targetInfo, "delete", updateParameter3, ttlParameter);
+        BatchModeLoadParameter batchModeLoadParameter1 = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", updateParameter1, ttlParameter);
+        BatchModeLoadParameter batchModeLoadParameter2 = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"update", updateParameter2, ttlParameter);
+        BatchModeLoadParameter batchModeLoadParameter3 = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"delete", updateParameter3, ttlParameter);
         BatchModeLoadParameters batchModeLoadParameters = new BatchModeLoadParameters();
         batchModeLoadParameters.loadParameters.add(batchModeLoadParameter1);
         batchModeLoadParameters.loadParameters.add(batchModeLoadParameter2);
@@ -319,19 +342,52 @@ public class LoaderTest
     // Env specific test, disabled by default remove "_" in method to enable
     public void _testLoadTarget()
     {
-        TargetInfo targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password");
+        TargetInfo targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.30");
         LoadTarget target = new LoadTarget(targetinfo);
         String key = "1";
         String docJson = "{\"id\" : \"1\", \"updatefieldname\" : \"2000-01-02\", \"field2\" : \"abcd\"}";
         JsonDocument doc = JsonDocument.create(key, JsonObject.fromJson(docJson));
         target.upsert(doc);
         target.delete(doc);
+        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from GleambookMessages;");
+        assertTrue(o != null);
+        assertTrue(o.status.equals("success"));
+        assertTrue(o.metrics.resultCount == 1);
+        try {
+            o = target.cbasQuery("select count(*) from GleambookMessage");
+            assertTrue(false);
+        }
+        catch (RuntimeException e) {
+            assertTrue(true);
+        }
+        target.close();
+
+        // Target with invalid IP for couchbase and cbas
+        targetinfo = new TargetInfo("172.23.98.70", "bucket-1", "bucket-1", "password", "172.23.98.70");
+        try {
+            target = new LoadTarget(targetinfo);
+            assertTrue(false);
+        }
+        catch (Exception e)
+        {
+            assertTrue(true);
+        }
+
+        targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.70");
+        target = new LoadTarget(targetinfo);
+        try {
+            o = target.cbasQuery("select count(*) from GleambookMessages;");
+            assertTrue(false);
+        }
+        catch (Exception e) {
+            assertTrue(true);
+        }
         target.close();
     }
 
     // Env specific test, disabled by default remove "_" in method to enable
     public void _testLoadTargetRetry() {
-        TargetInfo targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password");
+        TargetInfo targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.30");
         String key = "1";
         String docJson = "{\"id\" : \"1\", \"updatefieldname\" : \"2000-01-02\", \"field2\" : \"abcd\"}";
         JsonDocument doc = JsonDocument.create(key, JsonObject.fromJson(docJson));
@@ -360,10 +416,10 @@ public class LoaderTest
         public int deleteNum;
         public int insertNum;
         public int ttlNum;
-        public LoadParameterTest(DataInfo dataInfo, TargetInfo targetInfo,
+        public LoadParameterTest(DataInfo dataInfo, TargetInfo targetInfo, QueryInfo queryInfo,
                                  int updateNum, int deleteNum,
                                  int insertNum, int ttlNum) {
-            super(dataInfo, targetInfo);
+            super(dataInfo, targetInfo, queryInfo);
             this.updateNum = updateNum;
             this.deleteNum = deleteNum;
             this.insertNum = insertNum;
@@ -377,41 +433,57 @@ public class LoaderTest
         public int deleteCnt = 0;
         public int insertCnt = 0;
         public int ttlCnt = 0;
+        public int queryCnt = 0;
         private final JsonDocument doc;
         @Override
         public JsonDocument GetNextDocumentForUpdate() {
-            if (updateCnt ++ >= loadParameter.updateNum)
+            if (updateCnt >= loadParameter.updateNum)
                 return null;
-            else
+            else {
+                updateCnt++;
                 return doc;
+            }
         }
         @Override
         public JsonDocument GetNextDocumentForDelete() {
-            if (deleteCnt ++ >= loadParameter.deleteNum)
+            if (deleteCnt >= loadParameter.deleteNum)
                 return null;
-            else
+            else {
+                deleteCnt++;
                 return doc;
+            }
         }
         @Override
         public JsonDocument GetNextDocumentForInsert() {
-            if (insertCnt ++ >= loadParameter.insertNum)
+            if (insertCnt >= loadParameter.insertNum)
                 return null;
-            else
+            else {
+                insertCnt++;
                 return doc;
+            }
         }
         @Override
         public JsonDocument GetNextDocumentForTTL() {
-            if (ttlCnt ++ >= loadParameter.ttlNum)
+            if (ttlCnt >= loadParameter.ttlNum)
+                return null;
+            else {
+                ttlCnt++;
+                return doc;
+            }
+        }
+        @Override
+        public String GetNextQuery() {
+            if (queryCnt >= loadParameter.queryInfo.queries.size())
                 return null;
             else
-                return doc;
+                return loadParameter.queryInfo.queries.get(queryCnt++);
         }
         @Override
         public void close() {
             return;
         }
-        public LoadDataTest(DataInfo dataInfo, LoadParameterTest loadParameter) {
-            super(dataInfo);
+        public LoadDataTest(DataInfo dataInfo, QueryInfo queryInfo, LoadParameterTest loadParameter) {
+            super(dataInfo, queryInfo);
             this.loadParameter = loadParameter;
             doc = JsonDocument.create("1", JsonObject.fromJson("{\"id\" : \"1\"}"));
         }
@@ -421,6 +493,7 @@ public class LoaderTest
     {
         public int upsertCnt = 0;
         public int deleteCnt = 0;
+        public int queryCnt = 0;
         @Override
         protected void upsertWithoutRetry(JsonDocument doc) {
             upsertCnt++;
@@ -443,6 +516,18 @@ public class LoaderTest
             if (deleteCnt == 1)
                 throw new RuntimeException("test loader");
             return;
+        }
+
+        @Override
+        public CBASQueryResult cbasQuery(String query) {
+            this.queryCnt++;
+            try {
+                Thread.sleep(10);
+            }
+            catch (InterruptedException e) {}
+            if (queryCnt == 1)
+                throw new RuntimeException("test loader");
+            return new CBASQueryResult("success", new CBASQueryMetrics("a", "b", 10, 10));
         }
 
         public LoadTargetTest(TargetInfo targetInfo) {
@@ -492,10 +577,19 @@ public class LoaderTest
                     continue;
                 }
             }
+            while (true) {
+                try {
+                    if (!operate("query"))
+                        break;
+                } catch (Exception e) {
+                    System.err.println(e.toString());
+                    continue;
+                }
+            }
         }
 
         public LoaderTestClass(LoadParameterTest parameter, LoadTargetTest loadTargetTest) {
-            super(parameter, new LoadDataTest(parameter.dataInfo, parameter), (LoadTarget)loadTargetTest);
+            super(parameter, new LoadDataTest(parameter.dataInfo, parameter.queryInfo, parameter), (LoadTarget)loadTargetTest);
         }
     }
 
@@ -506,8 +600,11 @@ public class LoaderTest
         int insertNum = 12;
         int ttlNum = 13;
         DataInfo dataInfo = new DataInfo("data.json", "data.meta", "id", 10);
-        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password");
-        LoadParameterTest loadParam = new LoadParameterTest(dataInfo, targetInfo, updateNum, deleteNum, insertNum, ttlNum);
+        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.30");
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
+        LoadParameterTest loadParam = new LoadParameterTest(dataInfo, targetInfo, queryInfo, updateNum, deleteNum, insertNum, ttlNum);
         LoadTargetTest loadTarget = new LoadTargetTest(targetInfo);
         LoaderTestClass loader = new LoaderTestClass(loadParam, loadTarget);
         loader.start();
@@ -521,14 +618,19 @@ public class LoaderTest
         assertTrue(loader.getParameterForTest().deleteNum == deleteNum);
         assertTrue(loader.getParameterForTest().insertNum == insertNum);
         assertTrue(loader.getParameterForTest().ttlNum == ttlNum);
-
-        assertTrue(loader.getDataForTest().updateCnt == updateNum + 1);
-        assertTrue(loader.getDataForTest().insertCnt == insertNum + 1);
-        assertTrue(loader.getDataForTest().ttlCnt == ttlNum + 1);
-        assertTrue(loader.getDataForTest().deleteCnt == deleteNum + 1);
-
+        assertTrue(loader.getParameterForTest().queryInfo.queries.size() == queryInfo.queries.size());
+        assertTrue(loader.getDataForTest().updateCnt == updateNum);
+        assertTrue(loader.getDataForTest().insertCnt == insertNum);
+        assertTrue(loader.getDataForTest().ttlCnt == ttlNum);
+        assertTrue(loader.getDataForTest().deleteCnt == deleteNum);
+        assertTrue(loader.getDataForTest().queryCnt == queryInfo.queries.size());
         assertTrue(loadTarget.deleteCnt == deleteNum);
         assertTrue(loadTarget.upsertCnt == (updateNum + insertNum + ttlNum + 1));
+
+        assertTrue(loader.successStats.queryNumber == 1);
+        assertTrue(loader.failedStats.queryNumber == 1);
+        assertTrue(loader.successStats.queryLatency >= 10 && loader.successStats.queryLatency < 15);
+        assertTrue(loader.failedStats.queryLatency >= 10 && loader.failedStats.queryLatency < 15);
 
         assertTrue(loader.successStats.deleteNumber == deleteNum - 1);
         assertTrue(loader.failedStats.deleteNumber == 1);
@@ -568,13 +670,17 @@ public class LoaderTest
         String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length)};
         createFileWithContents(metaFile, contentsMeta);
 
-        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password");
+        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.30");
+
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select * from x;");
 
         BatchModeUpdateParameter batchModeUpdateParameters[] = initializeUpdateParameters();
         BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
 
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -588,14 +694,16 @@ public class LoaderTest
             assertTrue(loader.successStats.deleteNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0);
             assertTrue(loader.successStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber == 0);
             assertTrue(loader.failedStats.insertNumber == 0);
             assertTrue(loader.failedStats.deleteNumber == 0);
             assertTrue(loader.failedStats.updateNumber == 0);
             assertTrue(loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.failedStats.queryNumber == 0);
         }
 
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "delete", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"delete", batchModeUpdateParameters[0], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -609,14 +717,16 @@ public class LoaderTest
             assertTrue(loader.successStats.deleteNumber == docContents.length);
             assertTrue(loader.successStats.updateNumber == 0);
             assertTrue(loader.successStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber == 0);
             assertTrue(loader.failedStats.insertNumber == 0);
             assertTrue(loader.failedStats.deleteNumber == 0);
             assertTrue(loader.failedStats.updateNumber == 0);
             assertTrue(loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.failedStats.queryNumber == 0);
         }
 
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -627,7 +737,7 @@ public class LoaderTest
         }
 
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "ttl", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"ttl", batchModeUpdateParameters[0], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -642,14 +752,39 @@ public class LoaderTest
             assertTrue(loader.successStats.deleteNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0);
             assertTrue(loader.successStats.ttlNumber == docContents.length);
+            assertTrue(loader.successStats.queryNumber == 0);
             assertTrue(loader.failedStats.insertNumber == 0);
             assertTrue(loader.failedStats.deleteNumber == 0);
             assertTrue(loader.failedStats.updateNumber == 0);
             assertTrue(loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.failedStats.queryNumber == 0);
         }
 
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"query", batchModeUpdateParameters[0], batchModeTTLParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            loader.start();
+            try {
+                loader.join();
+            }
+            catch (InterruptedException e)
+            {
+                assertTrue(false);
+            }
+            assertTrue(loader.successStats.insertNumber == 0);
+            assertTrue(loader.successStats.deleteNumber == 0);
+            assertTrue(loader.successStats.updateNumber == 0);
+            assertTrue(loader.successStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber == 1);
+            assertTrue(loader.failedStats.insertNumber == 0);
+            assertTrue(loader.failedStats.deleteNumber == 0);
+            assertTrue(loader.failedStats.updateNumber == 0);
+            assertTrue(loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.failedStats.queryNumber == 1);
+        }
+
+        {
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -661,7 +796,7 @@ public class LoaderTest
 
         for (int i = 0; i < batchModeUpdateParameters.length; i++)
         {
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "update", batchModeUpdateParameters[i], batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"update", batchModeUpdateParameters[i], batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -675,10 +810,12 @@ public class LoaderTest
             assertTrue(loader.successStats.deleteNumber == 0);
             assertTrue(loader.successStats.updateNumber == docContents.length);
             assertTrue(loader.successStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber == 0);
             assertTrue(loader.failedStats.insertNumber == 0);
             assertTrue(loader.failedStats.deleteNumber == 0);
             assertTrue(loader.failedStats.updateNumber == 0);
             assertTrue(loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.failedStats.queryNumber == 0);
         }
     }
 
@@ -702,11 +839,16 @@ public class LoaderTest
 
         long extraIdStart = 10000;
 
-        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password");
+        TargetInfo targetInfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.30");
+
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
+
         {
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameter, batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -716,6 +858,7 @@ public class LoaderTest
             {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber == docContents.length && loader.failedStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
@@ -727,8 +870,8 @@ public class LoaderTest
             MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(1);
             MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(50, 20, new Date(),
-                    100, 0, 0, 0,
-                    dataInfo, targetInfo,
+                    100, 0, 0, 0, 0,
+                    dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
             MixModeLoaderTest loader = new MixModeLoaderTest(mixModeLoadParameter);
             loader.start();
@@ -738,6 +881,7 @@ public class LoaderTest
             catch (InterruptedException e) {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber >= 399 && loader.successStats.insertNumber <= 401 && loader.failedStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
@@ -751,8 +895,8 @@ public class LoaderTest
             MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(1);
             MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(50, 20, new Date(),
-                    0, 100, 0, 0,
-                    dataInfo, targetInfo,
+                    0, 100, 0, 0, 0,
+                    dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
             MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
             loader.start();
@@ -762,6 +906,7 @@ public class LoaderTest
             catch (InterruptedException e) {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber == 0 && loader.failedStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber >= 399 && loader.successStats.updateNumber <= 401 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
@@ -775,8 +920,8 @@ public class LoaderTest
             MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(10);
             MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(200, 10, new Date(),
-                    0, 0, 100, 0,
-                    dataInfo, targetInfo,
+                    0, 0, 100, 0, 0,
+                    dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
             MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
             loader.start();
@@ -786,6 +931,7 @@ public class LoaderTest
             catch (InterruptedException e) {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber == 0 && loader.successStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber >= 49 && loader.successStats.deleteNumber <= 51 && loader.failedStats.deleteNumber == 0);
@@ -797,7 +943,7 @@ public class LoaderTest
         {
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameter, batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -807,6 +953,7 @@ public class LoaderTest
             {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber == docContents.length && loader.failedStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
@@ -818,8 +965,33 @@ public class LoaderTest
             MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(10);
             MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(100, 20, new Date(),
-                    0, 0, 0, 100,
-                    dataInfo, targetInfo,
+                    0, 0, 0, 100, 0,
+                    dataInfo, targetInfo, queryInfo,
+                    insertParameter, deleteParameter, ttlParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            loader.start();
+            try {
+                loader.join();
+            }
+            catch (InterruptedException e) {
+                assertTrue(false);
+            }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
+            assertTrue(loader.successStats.insertNumber == 0 && loader.successStats.insertNumber == 0);
+            assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
+            assertTrue(loader.successStats.ttlNumber >= 99 && loader.successStats.ttlNumber <= 101 && loader.failedStats.ttlNumber >= 99 && loader.failedStats.ttlNumber <= 101);
+            assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
+            assertTrue(loader.getData().getCurrentExtraInsertId() == extraIdStart);
+            assertTrue(loader.getData().getRemovedKeysNumber() == loader.successStats.ttlNumber);
+        }
+
+        {
+            MixModeInsertParameter insertParameter = new MixModeInsertParameter(extraIdStart);
+            MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(10);
+            MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
+            MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(200, 10, new Date(),
+                    0, 0, 0, 0, 100,
+                    dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
             MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
             loader.start();
@@ -831,16 +1003,15 @@ public class LoaderTest
             }
             assertTrue(loader.successStats.insertNumber == 0 && loader.successStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
-            assertTrue(loader.successStats.ttlNumber >= 99 && loader.successStats.ttlNumber <= 101 && loader.failedStats.ttlNumber >= 99 && loader.failedStats.ttlNumber <= 101);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
-            assertTrue(loader.getData().getCurrentExtraInsertId() == extraIdStart);
-            assertTrue(loader.getData().getRemovedKeysNumber() == loader.successStats.ttlNumber);
+            assertTrue(loader.successStats.ttlNumber == 0 && loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber >= 49 && loader.successStats.queryNumber < 52 && loader.failedStats.queryNumber == 0);
         }
 
         {
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
-            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, "insert", batchModeUpdateParameter, batchModeTTLParameter);
+            BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
             BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
             loader.start();
             try {
@@ -854,6 +1025,7 @@ public class LoaderTest
             assertTrue(loader.successStats.updateNumber == 0 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.deleteNumber == 0 && loader.failedStats.deleteNumber == 0);
             assertTrue(loader.successStats.ttlNumber == 0 && loader.failedStats.ttlNumber == 0);
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
         }
 
         {
@@ -861,8 +1033,8 @@ public class LoaderTest
             MixModeDeleteParameter deleteParameter = new MixModeDeleteParameter(10);
             MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 2);
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(50, 30, new Date(),
-                    100, 100, 50, 50,
-                    dataInfo, targetInfo,
+                    100, 100, 50, 50, 0,
+                    dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
             MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
             loader.start();
@@ -872,6 +1044,7 @@ public class LoaderTest
             catch (InterruptedException e) {
                 assertTrue(false);
             }
+            assertTrue(loader.successStats.queryNumber == 0 && loader.failedStats.queryNumber == 0);
             assertTrue(loader.successStats.insertNumber >= 160 && loader.successStats.insertNumber <= 240 && loader.failedStats.insertNumber == 0);
             assertTrue(loader.successStats.updateNumber >= 160 && loader.successStats.updateNumber <= 240 && loader.failedStats.updateNumber == 0);
             assertTrue(loader.successStats.ttlNumber >= 80 && loader.successStats.ttlNumber <= 120 && loader.failedStats.ttlNumber == 0);
@@ -891,10 +1064,14 @@ public class LoaderTest
         String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length)};
         createFileWithContents(metaFile, contentsMeta);
 
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
+
         BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1000", "1005");
         BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
 
-        BatchModeLoadData data = new BatchModeLoadData(dataInfo, batchModeTTLParameter, batchModeUpdateParameter);
+        BatchModeLoadData data = new BatchModeLoadData(dataInfo, queryInfo, batchModeTTLParameter, batchModeUpdateParameter);
 
         JsonDocument doc = null;
         for (long i = 0; i < docContents.length; i ++)
@@ -916,6 +1093,9 @@ public class LoaderTest
             }
             assertTrue(doc.id().equals(String.valueOf(i+1)));
         }
+        assertTrue(data.GetNextQuery().equals("select 1;"));
+        assertTrue(data.GetNextQuery().equals("select 2;"));
+        assertTrue(data.GetNextQuery() == null);
         assertTrue(data.GetNextDocumentForDelete() == null);
         assertTrue(data.GetNextDocumentForInsert() == null);
         assertTrue(data.GetNextDocumentForUpdate() == null);
@@ -933,10 +1113,14 @@ public class LoaderTest
         String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length)};
         createFileWithContents(metaFile, contentsMeta);
 
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
+
         MixModeInsertParameter insertParam = new MixModeInsertParameter(1000000000);
         MixModeDeleteParameter delParam = new MixModeDeleteParameter(10);
         MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 10);
-        MixModeLoadData data = new MixModeLoadData(dataInfo, insertParam, delParam, ttlParameter);
+        MixModeLoadData data = new MixModeLoadData(dataInfo, queryInfo, insertParam, delParam, ttlParameter);
 
         JsonDocument doc = null;
         doc = data.GetNextDocumentForInsert();
@@ -989,7 +1173,10 @@ public class LoaderTest
 
         assertTrue(data.getCurrentExtraInsertId() == 1000000002);
         assertTrue(data.getRemovedKeysNumber() == 100);
-
+        for (int i = 0; i < 10; i++) {
+            String query = data.GetNextQuery();
+            assertTrue(query.equals("select 1;") || query.equals("select 2;"));
+        }
         data.close();
     }
 
@@ -999,30 +1186,36 @@ public class LoaderTest
         s1.deleteNumber = 2;
         s1.updateNumber = 3;
         s1.ttlNumber = 4;
+        s1.queryNumber = 9;
         s1.insertLatency = 5;
         s1.deleteLatency = 6;
         s1.updateLatency = 7;
         s1.ttlLatency = 8;
+        s1.queryLatency = 10;
 
         LoadStats s2 = new LoadStats();
         s2.insertNumber = 1;
         s2.deleteNumber = 2;
         s2.updateNumber = 3;
         s2.ttlNumber = 4;
+        s2.queryNumber = 9;
         s2.insertLatency = 5;
         s2.deleteLatency = 6;
         s2.updateLatency = 7;
         s2.ttlLatency = 8;
+        s2.queryLatency = 10;
 
         s1.add(s2);
         assertTrue(s1.insertNumber == 2 * s2.insertNumber);
         assertTrue(s1.deleteNumber == 2 * s2.deleteNumber);
         assertTrue(s1.updateNumber == 2 * s2.updateNumber);
         assertTrue(s1.ttlNumber == 2 * s2.ttlNumber);
+        assertTrue(s1.queryNumber == 2* s2.queryNumber);
         assertTrue(s1.insertLatency == 2 * s2.insertLatency);
         assertTrue(s1.deleteLatency == 2 * s2.deleteLatency);
         assertTrue(s1.updateLatency == 2 * s2.updateLatency);
         assertTrue(s1.ttlLatency == 2 * s2.ttlLatency);
+        assertTrue(s1.queryLatency == 2 * s2.queryLatency);
         String s = s1.toString();
     }
 }

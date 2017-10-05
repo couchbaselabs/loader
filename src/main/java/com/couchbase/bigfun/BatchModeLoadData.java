@@ -5,6 +5,7 @@ import com.couchbase.client.java.document.json.JsonObject;
 
 import java.io.*;
 import java.util.Random;
+import java.util.ArrayList;
 
 public class BatchModeLoadData extends LoadData {
 
@@ -18,6 +19,9 @@ public class BatchModeLoadData extends LoadData {
 
     private int expiryStart;
     private int expiryEnd;
+
+    private ArrayList<String> queries = new ArrayList<String>();
+    private int currentQueryIndex;
 
     private JsonObjectUpdater updater;
 
@@ -77,6 +81,15 @@ public class BatchModeLoadData extends LoadData {
     }
 
     @Override
+    public String GetNextQuery() {
+        String query = null;
+        if (this.currentQueryIndex < this.queries.size()) {
+            query = this.queries.get(this.currentQueryIndex++);
+        }
+        return query;
+    }
+
+    @Override
     public void close() {
         try {
             bufferedReader.close();
@@ -87,8 +100,8 @@ public class BatchModeLoadData extends LoadData {
         return;
     }
 
-    public BatchModeLoadData(DataInfo dataInfo, BatchModeTTLParameter ttlParam, BatchModeUpdateParameter updateParam) {
-        super(dataInfo);
+    public BatchModeLoadData(DataInfo dataInfo, QueryInfo queryInfo, BatchModeTTLParameter ttlParam, BatchModeUpdateParameter updateParam) {
+        super(dataInfo, queryInfo);
         this.ttlParam = ttlParam;
         this.updateParam = updateParam;
         File file = new File(dataInfo.dataFilePath);
@@ -104,5 +117,9 @@ public class BatchModeLoadData extends LoadData {
         this.expiryStart = ttlParam.expiryStart;
         this.expiryEnd = ttlParam.expiryEnd;
         this.updater = new JsonObjectUpdater(this.updateParam);
+        this.currentQueryIndex = 0;
+        for (String query : queryInfo.queries) {
+            this.queries.add(query);
+        }
     }
 }

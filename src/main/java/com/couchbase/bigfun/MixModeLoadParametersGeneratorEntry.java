@@ -24,6 +24,7 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
         System.out.println("-dp <deleteportion>");
         System.out.println("-up <upateportion>");
         System.out.println("-tp <ttlportion>");
+        System.out.println("-qp <queryportion>");
         System.out.println("-md <maxdeletedocs>");
         System.out.println("-is <insertstart>");
         System.out.println("-ir <insertrange>");
@@ -67,6 +68,9 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
                             break;
                         case "-tp":
                             arguments.put("ttlPropotion", Integer.valueOf(args[++i]));
+                            break;
+                        case "-qp":
+                            arguments.put("queryPropotion", Integer.valueOf(args[++i]));
                             break;
                         case "-md":
                             arguments.put("maxDeleteDocs", Long.valueOf(args[++i]));
@@ -125,6 +129,7 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
 
         TargetInfo targetInfo = getTargetInfo();
         DataInfo partitionDataInfos[] = getAllPartitionDataInfos();
+        QueryInfo queryInfo = getQueryInfo();
         MixModeTTLParameter ttlParameter = getTTLParameter();
         MixModeDeleteParameter deleteParameter = getDeleteParameter();
         Date startTime = getStartTime();
@@ -134,8 +139,9 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
             MixModeLoadParameter mixModeLoadParameter = new MixModeLoadParameter(
                     (int)arguments.get("intervalMS"), (int)arguments.get("durationSeconds"), startTime,
                     (int)arguments.get("insertPropotion"), (int)arguments.get("updatePropotion"),
-                    (int)arguments.get("deletePropotion"), (int)arguments.get("ttlPropotion"),
-                    partitionDataInfos[i], targetInfo, insertParameter, deleteParameter, ttlParameter);
+                    (int)arguments.get("deletePropotion"), (int)arguments.get("ttlPropotion"), (int)arguments.get("queryPropotion"),
+                    partitionDataInfos[i], targetInfo, queryInfo,
+                    insertParameter, deleteParameter, ttlParameter);
             mixModeLoadParameters.loadParameters.add(mixModeLoadParameter);
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
