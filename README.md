@@ -43,22 +43,23 @@ There are 5 main classes for each mode' loader, a Loader which is a thread that 
 
 Batch mode loader classes (important ones) are:
 
-BatchModeLoadParameter
-BatchModeLoader
-BatchModeLoaderEntry
-BatchModeLoadParametersGeneratorEntry
-BatchModeLoadData
+*BatchModeLoadParameter
+*BatchModeLoader
+*BatchModeLoaderEntry
+*BatchModeLoadParametersGeneratorEntry
+*BatchModeLoadData
 
 Mix mode loader classes (important ones) are:
 
-MixModeLoadData
-MixModeLoadParameter
-MixModeLoadParametersGeneratorEntry
-MixModeLoader
-MixModeLoaderEntry
+*MixModeLoadData
+*MixModeLoadParameter
+*MixModeLoadParametersGeneratorEntry
+*MixModeLoader
+*MixModeLoaderEntry
 
 Here is a sample batch mode loader parameter file with just one loader defined:
 
+```javascript
 {
   "loadParameters": [
     {
@@ -94,9 +95,11 @@ Here is a sample batch mode loader parameter file with just one loader defined:
     }
   ]
 }
+```
 
 Here is a sample mix mode load parameter file (with one loader defined):
 
+```javascript
 {
   "loadParameters": [
     {
@@ -140,7 +143,7 @@ Here is a sample mix mode load parameter file (with one loader defined):
     }
   ]
 }
- 
+``` 
 
 
 
