@@ -95,7 +95,7 @@ public class LoadTarget {
                 post.setEntity(new StringEntity(data));
                 HttpResponse response = cbasClient.execute(post);
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new RuntimeException("Invalid query call");
+                    throw new RuntimeException(String.format("Invalid query call with status code %d", response.getStatusLine().getStatusCode()));
                 }
                 result = parseCbasQueryResultStream(response.getEntity().getContent());
             } catch (IOException e) {
