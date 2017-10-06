@@ -29,6 +29,10 @@
         <include>com.couchbase.client:java-client</include>
         <include>com.couchbase.client:core-io</include>
         <include>com.google.code.gson:gson</include>
+        <include>org.apache.httpcomponents:httpclient</include>
+        <include>org.apache.httpcomponents:httpcore</include>
+        <include>commons-logging:commons-logging</include>
+        <include>commons-codec:commons-codec</include>
         <include>io.reactivex:rxjava</include>
       </includes>
       <unpack>false</unpack>

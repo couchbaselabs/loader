@@ -33,7 +33,7 @@ public class LoadStats {
                 String.format("insertLatency=%d\n", this.insertLatency) +
                 String.format("deleteLatency=%d\n", this.deleteLatency) +
                 String.format("updateLatency=%d\n", this.updateLatency) +
-                String.format("ttlLatency=%d", this.ttlLatency) +
+                String.format("ttlLatency=%d\n", this.ttlLatency) +
                 String.format("queryLatency=%d", this.queryLatency);
     }
     @Override

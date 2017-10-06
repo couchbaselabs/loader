@@ -34,6 +34,7 @@ public abstract class LoadParametersGenerator {
         System.out.println("-b <bucket>");
         System.out.println("-ah <cbashost>");
         System.out.println("-qf <queryfile>");
+        System.out.println("-nm <partitionnumber>");
     }
 
     protected void parseArguments() {
@@ -77,6 +78,9 @@ public abstract class LoadParametersGenerator {
                         break;
                     case "-qf":
                         arguments.put("queryFile", args[++i]);
+                        break;
+                    case "-nm":
+                        arguments.put("numPartition", Integer.valueOf(args[++i]));
                         break;
                 }
             }
@@ -132,8 +136,11 @@ public abstract class LoadParametersGenerator {
 
     protected DataInfo[] getAllPartitionDataInfos() {
         String allPartitions[] = getAllSubFolders((String) arguments.get("partitionPath"));
-        DataInfo dataInfos[] = new DataInfo[allPartitions.length];
-        for (int i = 0; i < allPartitions.length; i++) {
+        int number = allPartitions.length;
+        if ((int)arguments.get("numPartition") < number)
+            number = (int)arguments.get("numPartition");
+        DataInfo dataInfos[] = new DataInfo[number];
+        for (int i = 0; i < number; i++) {
             File dataFile = new File(allPartitions[i], (String) arguments.get("dataFile") + ".json");
             File metaFile = new File(allPartitions[i], (String) arguments.get("dataFile") + ".meta");
             if (!dataFile.exists() || !dataFile.isFile())

@@ -90,7 +90,8 @@ public class Loader<PARAMT, DATAT> extends Thread {
             try {
                 String query = data.GetNextQuery();
                 if (query != null) {
-                    this.target.cbasQuery(query);
+                    LoadTarget.CBASQueryResult queryResult = this.target.cbasQuery(query);
+                    System.out.println(String.format("CBAS result count %d", queryResult.metrics.resultCount));
                     Date end = new Date();
                     this.successStats.queryNumber++;
                     this.successStats.queryLatency += end.getTime() - start.getTime();
