@@ -10,23 +10,23 @@ After building the project with `mvn clean package`, a package (`*-binary-assemb
 
 A Jar file lib/loader-1.0-SNAPSHOT.jar is built which contains 4 main entries.
 
-com.couchbase.bigfun.BatchModeLoaderEntry
+**com.couchbase.bigfun.BatchModeLoaderEntry**
 
 This is a main entry which takes a json file as load generation parameters and run load (insert/delete/update/expire/run Analytics query) in a "batch" and paralleled way. 
 The json file defines an array of load parameters, each load parameter defines how one load generation thread is created and generates the load. 
 The load generation thread is ran in a "batch" style which means it will finish generating the load defined in the "data file"/"query file" in the load parameter and terminate.  
 
-com.couchbase.bigfun.MixModeLoaderEntry
+**com.couchbase.bigfun.MixModeLoaderEntry**
 
 This is a main entry which takes a json file as load generation parameters and run load (insert/delete/update/expire/run Analytics query) in a "randomly mixed" and paralleled way.
 The json file defines an array of load parameters, each load parameter defines how one load generation thread is created and generates the load. 
 The load generation thread is ran in a "randomly mixed" style which means it will keep running for specified duration at the specified interval, and randomly pick different load to run. All these parameters are defined in the load parameter. 
  
-com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry
+**com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry**
 
 This is a main entry which user can use to generate a batch mode load parameters file according to command parameters.
 
-com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry
+**com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry**
 
 This is a main entry which user can use to generate a mix mode load parameters file according to command parameters.
 
@@ -43,19 +43,19 @@ There are 5 main classes for each mode' loader, a Loader which is a thread that 
 
 Batch mode loader classes (important ones) are:
 
-*BatchModeLoadParameter
-*BatchModeLoader
-*BatchModeLoaderEntry
-*BatchModeLoadParametersGeneratorEntry
-*BatchModeLoadData
+  *BatchModeLoadParameter
+  *BatchModeLoader
+  *BatchModeLoaderEntry
+  *BatchModeLoadParametersGeneratorEntry
+  *BatchModeLoadData
 
 Mix mode loader classes (important ones) are:
 
-*MixModeLoadData
-*MixModeLoadParameter
-*MixModeLoadParametersGeneratorEntry
-*MixModeLoader
-*MixModeLoaderEntry
+  *MixModeLoadData
+  *MixModeLoadParameter
+  *MixModeLoadParametersGeneratorEntry
+  *MixModeLoader
+  *MixModeLoaderEntry
 
 Here is a sample batch mode loader parameter file with just one loader defined:
 
