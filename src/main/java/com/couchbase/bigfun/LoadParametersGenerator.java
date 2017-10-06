@@ -137,7 +137,7 @@ public abstract class LoadParametersGenerator {
     protected DataInfo[] getAllPartitionDataInfos() {
         String allPartitions[] = getAllSubFolders((String) arguments.get("partitionPath"));
         int number = allPartitions.length;
-        if ((int)arguments.get("numPartition") < number)
+        if (arguments.containsKey("numPartition") && (int)arguments.get("numPartition") < number)
             number = (int)arguments.get("numPartition");
         DataInfo dataInfos[] = new DataInfo[number];
         for (int i = 0; i < number; i++) {
