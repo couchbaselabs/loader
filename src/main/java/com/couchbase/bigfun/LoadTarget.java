@@ -131,6 +131,9 @@ public class LoadTarget {
                     case "metrics":
                         metrics = parseCbaseQueryResultStreamMetrics(reader);
                         break;
+                    default:
+                        reader.skipValue();
+                        break;
                 }
             }
             reader.endObject();
@@ -163,6 +166,9 @@ public class LoadTarget {
                     break;
                 case "resultSize":
                     resultSize = reader.nextLong();
+                    break;
+                default:
+                    reader.skipValue();
                     break;
             }
         }
