@@ -11,19 +11,23 @@ After building the project with `mvn clean package`, a package (`*-binary-assemb
 A Jar file lib/loader-1.0-SNAPSHOT.jar is built which contains 4 main entries.
 
 com.couchbase.bigfun.BatchModeLoaderEntry
+
 This is a main entry which takes a json file as load generation parameters and run load (insert/delete/update/expire/run Analytics query) in a "batch" and paralleled way. 
 The json file defines an array of load parameters, each load parameter defines how one load generation thread is created and generates the load. 
 The load generation thread is ran in a "batch" style which means it will finish generating the load defined in the "data file"/"query file" in the load parameter and terminate.  
 
 com.couchbase.bigfun.MixModeLoaderEntry
+
 This is a main entry which takes a json file as load generation parameters and run load (insert/delete/update/expire/run Analytics query) in a "randomly mixed" and paralleled way.
 The json file defines an array of load parameters, each load parameter defines how one load generation thread is created and generates the load. 
 The load generation thread is ran in a "randomly mixed" style which means it will keep running for specified duration at the specified interval, and randomly pick different load to run. All these parameters are defined in the load parameter. 
  
 com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry
+
 This is a main entry which user can use to generate a batch mode load parameters file according to command parameters.
 
 com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry
+
 This is a main entry which user can use to generate a mix mode load parameters file according to command parameters.
 
 In load parameter, there is a DataInfo object containing information of the data file (of a data partition socialGen generated) used by the loader thread. 
@@ -35,9 +39,10 @@ A batch mode loader will try to insert/delete/update/expire data in the data fil
 
 A mix mode loader will randomly pick different operations according to operation propotion definition defined in load parameter, for insert opertion, it uses data as a template and randomly creates a non existing id / removed id and inserts the document, for update operation, mix mode loader will randomly pick a document and non removed id within the data file and update it, for delete / expire operation, the mix mode loader will randomly pick a non removed doc id from the data file and delete / expire it, for query operation, mix mode loader will randomly pick a query defined in the load parameter queries section and ran it.   
 
-There are 5 main classes for each mode' loader, a Loader which is a thread that runs the load, a loader parameter which defines the load parameter associated with the loader, a load data object which provide data/query information for the loader, an loader entry which creates and runs loader threads according the load parameters file, a utility generator which helps creating load parameter json file.$
+There are 5 main classes for each mode' loader, a Loader which is a thread that runs the load, a loader parameter which defines the load parameter associated with the loader, a load data object which provide data/query information for the loader, an loader entry which creates and runs loader threads according the load parameters file, a utility generator which helps creating load parameter json file.
 
 Batch mode loader classes (important ones) are:
+
 BatchModeLoadParameter
 BatchModeLoader
 BatchModeLoaderEntry
@@ -45,6 +50,7 @@ BatchModeLoadParametersGeneratorEntry
 BatchModeLoadData
 
 Mix mode loader classes (important ones) are:
+
 MixModeLoadData
 MixModeLoadParameter
 MixModeLoadParametersGeneratorEntry
@@ -52,6 +58,7 @@ MixModeLoader
 MixModeLoaderEntry
 
 Here is a sample batch mode loader parameter file with just one loader defined:
+
 {
   "loadParameters": [
     {
@@ -89,6 +96,7 @@ Here is a sample batch mode loader parameter file with just one loader defined:
 }
 
 Here is a sample mix mode load parameter file (with one loader defined):
+
 {
   "loadParameters": [
     {
