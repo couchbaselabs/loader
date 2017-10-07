@@ -87,14 +87,15 @@ public class Loader<PARAMT, DATAT> extends Thread {
         private boolean query() {
             boolean result;
             Date start = new Date();
+            String query = "";
             try {
-                String query = data.GetNextQuery();
                 if (query != null) {
+                    query = data.GetNextQuery();
                     LoadTarget.CBASQueryResult queryResult = this.target.cbasQuery(query);
-                    System.out.println(String.format("CBAS result count: %d, elapseTime: %s, executionTime: %s", queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
                     Date end = new Date();
                     this.successStats.queryNumber++;
                     this.successStats.queryLatency += end.getTime() - start.getTime();
+                    System.out.println(String.format("CBAS success query %s latency: %d, result count: %d, elapseTime: %s, executionTime: %s", query, end.getTime() - start.getTime(), queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
                     result = true;
                 }
                 else
@@ -104,6 +105,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
                 Date end = new Date();
                 this.failedStats.queryNumber++;
                 this.failedStats.queryLatency += end.getTime() - start.getTime();
+                System.out.println(String.format("CBAS failed query %s latency: %d", query, end.getTime() - start.getTime()));
                 throw e;
             }
             return result;
