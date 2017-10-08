@@ -349,12 +349,12 @@ public class LoaderTest
         JsonDocument doc = JsonDocument.create(key, JsonObject.fromJson(docJson));
         target.upsert(doc);
         target.delete(doc);
-        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from GleambookMessages;");
+        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from GleambookMessages;", 0);
         assertTrue(o != null);
         assertTrue(o.status.equals("success"));
         assertTrue(o.metrics.resultCount == 1);
         try {
-            o = target.cbasQuery("select count(*) from GleambookMessage");
+            o = target.cbasQuery("select count(*) from GleambookMessage", 0);
             assertTrue(false);
         }
         catch (RuntimeException e) {
@@ -376,7 +376,7 @@ public class LoaderTest
         targetinfo = new TargetInfo("172.23.98.29", "bucket-1", "bucket-1", "password", "172.23.98.70");
         target = new LoadTarget(targetinfo);
         try {
-            o = target.cbasQuery("select count(*) from GleambookMessages;");
+            o = target.cbasQuery("select count(*) from GleambookMessages;", 0);
             assertTrue(false);
         }
         catch (Exception e) {
@@ -519,7 +519,7 @@ public class LoaderTest
         }
 
         @Override
-        public CBASQueryResult cbasQuery(String query) {
+        public CBASQueryResult cbasQuery(String query, int retryNum) {
             this.queryCnt++;
             try {
                 Thread.sleep(10);

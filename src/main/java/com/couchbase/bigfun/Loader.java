@@ -91,7 +91,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
             try {
                 query = data.GetNextQuery();
                 if (query != null) {
-                    LoadTarget.CBASQueryResult queryResult = this.target.cbasQuery(query);
+                    LoadTarget.CBASQueryResult queryResult = this.target.cbasQuery(query, 3);
                     Date end = new Date();
                     this.successStats.queryNumber++;
                     this.successStats.queryLatency += end.getTime() - start.getTime();

@@ -86,23 +86,36 @@ public class LoadTarget {
         return;
     }
 
-    public CBASQueryResult cbasQuery(String query) {
+    public CBASQueryResult cbasQuery(String query, int retryNum) {
         CBASQueryResult result = null;
         if (!this.targetInfo.cbashost.equals("")) {
-            HttpPost post = createCbasPost();
-            String data = createCbasQueryJson(query);
-            try {
-                post.setEntity(new StringEntity(data));
-                HttpResponse response = cbasClient.execute(post);
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new RuntimeException(String.format("Invalid query call with status code %d", response.getStatusLine().getStatusCode()));
+            int retryCnt = 0;
+            while (true) {
+                HttpPost post = createCbasPost();
+                String data = createCbasQueryJson(query);
+                try {
+                    post.setEntity(new StringEntity(data));
+                    HttpResponse response = cbasClient.execute(post);
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                        throw new RuntimeException(String.format("Invalid query call with status code %d", response.getStatusLine().getStatusCode()));
+                    }
+                    result = parseCbasQueryResultStream(response.getEntity().getContent());
+                    break;
+                } catch (IOException e) {
+                    System.out.println("IOException occured while sending http request : " + e);
+                    if (retryCnt++ > retryNum) {
+                        throw new RuntimeException("Retry too much times after IOException", e);
+                    }
+                    try {
+                        Thread.sleep(this.timeout);
+                    }
+                    catch (InterruptedException ie) {
+                        System.err.println(e.toString());
+                        System.exit(-1);
+                    }
+                } finally {
+                    post.releaseConnection();
                 }
-                result = parseCbasQueryResultStream(response.getEntity().getContent());
-            } catch (IOException e) {
-                System.out.println("IOException occured while sending http request : " + e);
-                throw new RuntimeException("IOException while sending http request for cbas query", e);
-            } finally {
-                post.releaseConnection();
             }
         }
         return result;
