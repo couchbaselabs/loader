@@ -108,6 +108,7 @@ public class LoadTarget {
                     }
                     try {
                         Thread.sleep(this.timeout);
+                        System.out.println(String.format("Retry %d after IOException", retryCnt));
                     }
                     catch (InterruptedException ie) {
                         System.err.println(e.toString());
