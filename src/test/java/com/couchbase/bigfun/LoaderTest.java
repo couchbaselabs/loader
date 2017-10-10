@@ -1117,45 +1117,81 @@ public class LoaderTest
         queryInfo.queries.add("select 1;");
         queryInfo.queries.add("select 2;");
 
-        MixModeInsertParameter insertParam = new MixModeInsertParameter(1000000000);
-        MixModeDeleteParameter delParam = new MixModeDeleteParameter(10);
-        MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, 10);
+        long insertIdStart = 1000000000;
+        int maxDeleteIds = 10;
+        int expiryEnd = 10;
+        MixModeInsertParameter insertParam = new MixModeInsertParameter(insertIdStart);
+        MixModeDeleteParameter delParam = new MixModeDeleteParameter(maxDeleteIds);
+        MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, expiryEnd);
         MixModeLoadData data = new MixModeLoadData(dataInfo, queryInfo, insertParam, delParam, ttlParameter);
+        verifyMixModeLoadData(data, insertIdStart, docContents.length, maxDeleteIds, "%d");
+    }
 
+    public void testMixModeLoadDataFormatedID() {
+        String dataFile = "data.json";
+        String metaFile = "data.meta";
+        String docContents[] = initializeJsonDocs(200);
+        DataInfo dataInfo = new DataInfo(dataFile, metaFile, "id", docContents.length);
+        createFileWithContents(dataFile, docContents);
+
+        String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length), "IDFormat=%015d"};
+        createFileWithContents(metaFile, contentsMeta);
+
+        QueryInfo queryInfo = new QueryInfo();
+        queryInfo.queries.add("select 1;");
+        queryInfo.queries.add("select 2;");
+
+        long insertIdStart = 1000000000;
+        int maxDeleteIds = 10;
+        int expiryEnd = 10;
+        MixModeInsertParameter insertParam = new MixModeInsertParameter(insertIdStart);
+        MixModeDeleteParameter delParam = new MixModeDeleteParameter(maxDeleteIds);
+        MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, expiryEnd);
+        MixModeLoadData data = new MixModeLoadData(dataInfo, queryInfo, insertParam, delParam, ttlParameter);
+        verifyMixModeLoadData(data, insertIdStart, docContents.length, maxDeleteIds, "%015d");
+    }
+
+    private void verifyMixModeLoadData(MixModeLoadData data, long insertIdStart, int docNum, int maxDeleteIds, String idFormat) {
         JsonDocument doc = null;
         doc = data.GetNextDocumentForInsert();
-        assertTrue(doc.id().equals(String.valueOf(1000000000)));
-        assertTrue(data.getCurrentExtraInsertId() == 1000000001);
+        assertTrue(doc.id().equals(String.format(idFormat, insertIdStart)));
+        assertTrue(data.getCurrentExtraInsertId() == insertIdStart+1);
         for (int i = 0; i < 9; i ++) {
             doc = data.GetNextDocumentForDelete();
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
             assertTrue(data.getRemovedKeysNumber() == i + 1);
         }
 
         doc = data.GetNextDocumentForInsert();
-        assertTrue(doc.id().equals(String.valueOf(1000000001)));
-        assertTrue(data.getCurrentExtraInsertId() == 1000000002);
+        assertTrue(doc.id().equals(String.format(idFormat, insertIdStart+1)));
+        assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
 
         doc = data.GetNextDocumentForDelete();
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
-        assertTrue(data.getRemovedKeysNumber() == 10);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(data.getRemovedKeysNumber() == maxDeleteIds);
 
         doc = data.GetNextDocumentForInsert();
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
-        assertTrue(data.getCurrentExtraInsertId() == 1000000002);
-        assertTrue(data.getRemovedKeysNumber() == 9);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
+        assertTrue(data.getRemovedKeysNumber() == maxDeleteIds - 1);
 
         doc = data.GetNextDocumentForDelete();
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
-        assertTrue(data.getRemovedKeysNumber() == 10);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(data.getRemovedKeysNumber() == maxDeleteIds);
 
         for (int i = 0; i < 45; i ++) {
             doc = data.GetNextDocumentForTTL();
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
-            assertTrue(data.getRemovedKeysNumber() == 11 + i * 2);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+            assertTrue(data.getRemovedKeysNumber() == maxDeleteIds + 1 + i * 2);
             doc = data.GetNextDocumentForDelete();
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docContents.length);
-            assertTrue(data.getRemovedKeysNumber() == 12 + i * 2);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+            assertTrue(data.getRemovedKeysNumber() == maxDeleteIds + 2 + i * 2);
         }
 
         try {
@@ -1171,7 +1207,7 @@ public class LoaderTest
         catch (RuntimeException e)
         { assertTrue(e.getMessage().equals("Too much documents removed"));}
 
-        assertTrue(data.getCurrentExtraInsertId() == 1000000002);
+        assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
         assertTrue(data.getRemovedKeysNumber() == 100);
         for (int i = 0; i < 10; i++) {
             String query = data.GetNextQuery();
