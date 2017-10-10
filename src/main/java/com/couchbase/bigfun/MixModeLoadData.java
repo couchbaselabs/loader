@@ -24,6 +24,7 @@ public class MixModeLoadData extends LoadData {
 
     private long operationIdStart;
     private long operationIdEnd;
+    private String operationIDFormat = null;
 
     private long extraInsertIdStart;
     private long currentExtraInsertId;
@@ -44,13 +45,23 @@ public class MixModeLoadData extends LoadData {
 
     private Random random = new Random();
 
+    private String getFormatedKey(long key) {
+        String keyStr;
+        if (operationIDFormat == null)
+            keyStr = String.valueOf(key);
+        else
+            keyStr = String.format(operationIDFormat, key);
+        return keyStr;
+    }
+
     private String getRandomNonRemovedKey() {
         while (true) {
-            String key = String.valueOf(operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart)));
-            if (removedKeys.contains(key)) {
+            long key = operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart));
+            String keyStr = getFormatedKey(key);
+            if (removedKeys.contains(keyStr)) {
                 continue;
             }
-            return key;
+            return keyStr;
         }
     }
 
@@ -61,7 +72,7 @@ public class MixModeLoadData extends LoadData {
             return k;
         }
         else
-            return String.valueOf(currentExtraInsertId++);
+            return getFormatedKey(currentExtraInsertId++);
     }
 
     private String getRandomKeyToRemove() {
@@ -156,6 +167,10 @@ public class MixModeLoadData extends LoadData {
                 throw new IllegalArgumentException("Invalid meta file content");
             this.operationIdStart = Long.valueOf(idStartString);
             this.operationIdEnd = Long.valueOf(idEndString);
+            String line2 = br.readLine();
+            if (line2 != null) {
+                this.operationIDFormat = line2.replaceFirst("IDFormat=", "");
+            }
         }
         catch (IOException e)
         {
