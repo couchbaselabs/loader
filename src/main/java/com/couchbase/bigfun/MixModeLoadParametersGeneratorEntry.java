@@ -96,15 +96,27 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
     }
 
     private MixModeTTLParameter getTTLParameter() {
-        return new MixModeTTLParameter((int) arguments.get("ttlStart"), (int) arguments.get("ttlEnd"));
+        if (!arguments.containsKey("ttlStart")) {
+            return new MixModeTTLParameter(0, 0);
+        } else {
+            return new MixModeTTLParameter((int) arguments.get("ttlStart"), (int) arguments.get("ttlEnd"));
+        }
     }
 
     private MixModeDeleteParameter getDeleteParameter() {
-        return new MixModeDeleteParameter((long) arguments.get("maxDeleteDocs"));
+        if (!arguments.containsKey("maxDeleteDocs")) {
+            return new MixModeDeleteParameter(0l);
+        } else {
+            return new MixModeDeleteParameter((long) arguments.get("maxDeleteDocs"));
+        }
     }
 
     private MixModeInsertParameter getInsertParameter(int partitionid) {
-        return new MixModeInsertParameter((long) arguments.get("insertIdStart") + partitionid * (long)arguments.get("insertIdRange"));
+        if (!arguments.containsKey("insertIdStart")) {
+            return new MixModeInsertParameter(0l);
+        } else {
+            return new MixModeInsertParameter((long) arguments.get("insertIdStart") + partitionid * (long) arguments.get("insertIdRange"));
+        }
     }
 
     private Date getStartTime() {

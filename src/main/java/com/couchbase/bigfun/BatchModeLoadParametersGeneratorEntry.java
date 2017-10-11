@@ -89,20 +89,30 @@ public class BatchModeLoadParametersGeneratorEntry extends LoadParametersGenerat
     }
 
     private BatchModeTTLParameter getTTLParameter() {
-        return new BatchModeTTLParameter((int) arguments.get("ttlStart"), (int) arguments.get("ttlEnd"));
+        if (!arguments.containsKey("ttlStart")) {
+            return new BatchModeTTLParameter(0, 0);
+        } else {
+            return new BatchModeTTLParameter((int) arguments.get("ttlStart"), (int) arguments.get("ttlEnd"));
+        }
     }
 
     private BatchModeUpdateParameter getUpdateParameter() {
         BatchModeUpdateParameter updateParameter = null;
-        if (arguments.containsKey("valueFormat")) {
-            updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
-                    (String) arguments.get("valueFormat"), (String) arguments.get("valueStart"), (String) arguments.get("valueEnd"));
-        } else if (arguments.containsKey("valuesFile")) {
-            updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
-                    (String) arguments.get("valuesFile"));
-        } else {
-            updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
-                    (String) arguments.get("valueStart"), (String) arguments.get("valueEnd"));
+        if (arguments.containsKey("fieldName")) {
+            if (arguments.containsKey("valueFormat")) {
+                updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
+                        (String) arguments.get("valueFormat"), (String) arguments.get("valueStart"), (String) arguments.get("valueEnd"));
+            } else if (arguments.containsKey("valuesFile")) {
+                updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
+                        (String) arguments.get("valuesFile"));
+            } else {
+                updateParameter = new BatchModeUpdateParameter((String) arguments.get("fieldName"), (String) arguments.get("fieldType"),
+                        (String) arguments.get("valueStart"), (String) arguments.get("valueEnd"));
+            }
+        }
+        else {
+            updateParameter = new BatchModeUpdateParameter("", "integer",
+                    "0", "0");
         }
         return updateParameter;
     }
