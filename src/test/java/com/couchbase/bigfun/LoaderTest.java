@@ -1203,13 +1203,13 @@ public class LoaderTest
             assertTrue(false);
         }
         catch (RuntimeException e)
-        { assertTrue(e.getMessage().equals("Too much documents removed"));}
+        { assertTrue(e.getMessage().startsWith("Too much documents removed"));}
         try {
             doc = data.GetNextDocumentForDelete();
             assertTrue(false);
         }
         catch (RuntimeException e)
-        { assertTrue(e.getMessage().equals("Too much documents removed"));}
+        { assertTrue(e.getMessage().startsWith("Too much documents removed"));}
 
         assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
         assertTrue(data.getRemovedKeysNumber() == 100);
