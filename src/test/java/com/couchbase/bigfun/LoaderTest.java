@@ -9,12 +9,16 @@ import junit.framework.TestSuite;
 
 import com.google.gson.Gson;
 
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -589,7 +593,7 @@ public class LoaderTest
         }
 
         public LoaderTestClass(LoadParameterTest parameter, LoadTargetTest loadTargetTest) {
-            super(parameter, new LoadDataTest(parameter.dataInfo, parameter.queryInfo, parameter), (LoadTarget)loadTargetTest);
+            super(parameter, new LoadDataTest(parameter.dataInfo, parameter.queryInfo, parameter), (LoadTarget)loadTargetTest, new ResultFile());
         }
     }
 
@@ -681,7 +685,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -704,7 +708,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"delete", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -727,7 +731,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -738,7 +742,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"ttl", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -762,7 +766,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"query", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -785,7 +789,7 @@ public class LoaderTest
 
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameters[0], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -797,7 +801,7 @@ public class LoaderTest
         for (int i = 0; i < batchModeUpdateParameters.length; i++)
         {
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"update", batchModeUpdateParameters[i], batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -822,7 +826,7 @@ public class LoaderTest
     private class MixModeLoaderTest extends MixModeLoader {
         public MixModeLoadData getData() { return super.getData(); }
         public MixModeLoaderTest(MixModeLoadParameter loadParameter){
-            super(loadParameter);
+            super(loadParameter, new ResultFile());
         }
     }
 
@@ -849,7 +853,7 @@ public class LoaderTest
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -898,7 +902,7 @@ public class LoaderTest
                     0, 100, 0, 0, 0,
                     dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
-            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -923,7 +927,7 @@ public class LoaderTest
                     0, 0, 100, 0, 0,
                     dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
-            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -944,7 +948,7 @@ public class LoaderTest
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -968,7 +972,7 @@ public class LoaderTest
                     0, 0, 0, 100, 0,
                     dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
-            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -993,7 +997,7 @@ public class LoaderTest
                     0, 0, 0, 0, 100,
                     dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
-            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -1012,7 +1016,7 @@ public class LoaderTest
             BatchModeUpdateParameter batchModeUpdateParameter = new BatchModeUpdateParameter("intfield", "integer", "1", "2");
             BatchModeTTLParameter batchModeTTLParameter = new BatchModeTTLParameter(1, 10);
             BatchModeLoadParameter batchModeLoadParameter = new BatchModeLoadParameter(dataInfo, targetInfo, queryInfo,"insert", batchModeUpdateParameter, batchModeTTLParameter);
-            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter);
+            BatchModeLoader loader = new BatchModeLoader(batchModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -1036,7 +1040,7 @@ public class LoaderTest
                     100, 100, 50, 50, 0,
                     dataInfo, targetInfo, queryInfo,
                     insertParameter, deleteParameter, ttlParameter);
-            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter);
+            MixModeLoader loader = new MixModeLoader(mixModeLoadParameter, new ResultFile());
             loader.start();
             try {
                 loader.join();
@@ -1253,5 +1257,29 @@ public class LoaderTest
         assertTrue(s1.ttlLatency == 2 * s2.ttlLatency);
         assertTrue(s1.queryLatency == 2 * s2.queryLatency);
         String s = s1.toString();
+    }
+
+    public void testResult() {
+        try (ResultFile rf = new ResultFile()) {
+            rf.printResult(String.format("abcd%d", 1));
+        } catch (IOException e) {
+            assertTrue(false);
+        }
+        try (ResultFile rf = new ResultFile("test.log")) {
+            rf.printResult(String.format("abcd%d", 1));
+        } catch (IOException e) {
+            assertTrue(false);
+        }
+        try (ResultFile rf = new ResultFile("test.log")) {
+            rf.printResult(String.format("abcd%d", 2));
+        } catch (IOException e) {
+            assertTrue(false);
+        }
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("test.log"), Charset.defaultCharset());
+            assertTrue(lines.size() == 1 && lines.get(0).equals("abcd2"));
+        } catch (IOException e) {
+            assertTrue(false);
+        }
     }
 }

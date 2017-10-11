@@ -34,6 +34,7 @@ public abstract class LoadParametersGenerator {
         System.out.println("-b <bucket>");
         System.out.println("-ah <cbashost>");
         System.out.println("-qf <queryfile>");
+        System.out.println("-nq <numberperquery>");
         System.out.println("-nm <partitionnumber>");
     }
 
@@ -79,6 +80,9 @@ public abstract class LoadParametersGenerator {
                     case "-qf":
                         arguments.put("queryFile", args[++i]);
                         break;
+                    case "-nq":
+                        arguments.put("numberPerQuery", Integer.valueOf(args[++i]));
+                        break;
                     case "-nm":
                         arguments.put("numPartition", Integer.valueOf(args[++i]));
                         break;
@@ -121,10 +125,16 @@ public abstract class LoadParametersGenerator {
         QueryInfo queryInfo = new QueryInfo();
         if (arguments.containsKey("queryFile")) {
             try {
+                int numberPerQuery = 1;
+                if (arguments.containsKey("numberPerQuery")) {
+                    numberPerQuery = (int)arguments.get("numberPerQuery");
+                }
                 String filename = (String) arguments.get("queryFile");
                 List<String> querylist = Files.readAllLines(Paths.get(filename), Charset.defaultCharset());
                 for (String query : querylist) {
-                    queryInfo.queries.add(query);
+                    for (int i = 0; i < numberPerQuery; i++) {
+                        queryInfo.queries.add(query);
+                    }
                 }
             }
             catch (IOException e) {

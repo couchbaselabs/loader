@@ -59,9 +59,9 @@ public class MixModeLoader extends Loader<MixModeLoadParameter, MixModeLoadData>
         }
     }
 
-    public MixModeLoader(MixModeLoadParameter loadParameter) {
+    public MixModeLoader(MixModeLoadParameter loadParameter, ResultFile resultFile) {
         super(loadParameter, new MixModeLoadData(loadParameter.dataInfo, loadParameter.queryInfo,
-                loadParameter.insertParameter, loadParameter.deleteParameter, loadParameter.ttlParameter));
+                loadParameter.insertParameter, loadParameter.deleteParameter, loadParameter.ttlParameter), resultFile);
 
         String operations[] = {
                 INSERT_OPERATION,

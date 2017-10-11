@@ -16,6 +16,14 @@
       <outputDirectory>bin</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>src/main/resources/queries</directory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>query.txt</include>
+      </includes>
+      <outputDirectory>bin</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>target</directory>
       <outputDirectory>lib</outputDirectory>
       <includes>

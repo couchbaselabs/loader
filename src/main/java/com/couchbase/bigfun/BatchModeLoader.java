@@ -22,9 +22,9 @@ public class BatchModeLoader extends Loader<BatchModeLoadParameter, BatchModeLoa
         }
     }
 
-    public BatchModeLoader(BatchModeLoadParameter loadParameter) {
+    public BatchModeLoader(BatchModeLoadParameter loadParameter, ResultFile resultFile) {
         super(loadParameter, new BatchModeLoadData(loadParameter.dataInfo, loadParameter.queryInfo,
-                loadParameter.ttlParameter, loadParameter.updateParameter));
+                loadParameter.ttlParameter, loadParameter.updateParameter), resultFile);
         this.operation = loadParameter.operation;
     }
 }

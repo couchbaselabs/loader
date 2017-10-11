@@ -19,6 +19,8 @@ public class Loader<PARAMT, DATAT> extends Thread {
 
         private LoadTarget target;
 
+        private ResultFile resultFile;
+
         public LoadStats successStats;
 
         public LoadStats failedStats;
@@ -32,6 +34,8 @@ public class Loader<PARAMT, DATAT> extends Thread {
         protected PARAMT getParameter() {
             return (PARAMT)parameter;
         }
+
+        protected void printResult(String result) { resultFile.printResult(result); }
 
         /*
         To be override
@@ -95,7 +99,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
                     Date end = new Date();
                     this.successStats.queryNumber++;
                     this.successStats.queryLatency += end.getTime() - start.getTime();
-                    System.out.println(String.format("CBAS success query %s latency: %d, result count: %d, elapseTime: %s, executionTime: %s", query, end.getTime() - start.getTime(), queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
+                    this.printResult(String.format("CBAS success query %s latency: %d, result count: %d, elapseTime: %s, executionTime: %s", query, end.getTime() - start.getTime(), queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
                     result = true;
                 }
                 else
@@ -105,7 +109,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
                 Date end = new Date();
                 this.failedStats.queryNumber++;
                 this.failedStats.queryLatency += end.getTime() - start.getTime();
-                System.out.println(String.format("CBAS failed query %s latency: %d", query, end.getTime() - start.getTime()));
+                this.printResult(String.format("CBAS failed query %s latency: %d", query, end.getTime() - start.getTime()));
                 throw e;
             }
             return result;
@@ -205,7 +209,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
             return result;
         }
 
-        protected Loader(LoadParameter parameter, LoadData data, LoadTarget loadTarget) {
+        protected Loader(LoadParameter parameter, LoadData data, LoadTarget loadTarget, ResultFile resultFile) {
             super();
             this.parameter = parameter;
             this.data = data;
@@ -213,12 +217,13 @@ public class Loader<PARAMT, DATAT> extends Thread {
                 this.target = new LoadTarget(this.parameter.targetInfo);
             else
                 this.target = loadTarget;
+            this.resultFile = resultFile;
             this.successStats = new LoadStats();
             this.failedStats = new LoadStats();
         }
 
-        public Loader(LoadParameter parameter, LoadData data) {
-            this(parameter, data, null);
+        public Loader(LoadParameter parameter, LoadData data, ResultFile resultFile) {
+            this(parameter, data, null, resultFile);
         }
     }
 

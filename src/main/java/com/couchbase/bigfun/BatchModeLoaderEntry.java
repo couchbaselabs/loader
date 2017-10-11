@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class BatchModeLoaderEntry {
     private static void Usage() {
-        System.out.println("BatchModeLoaderEntry <batch mode load parameter file name>");
+        System.out.println("BatchModeLoaderEntry <batch mode load parameter file name> [<result file>]");
         System.exit(1);
     }
 
@@ -20,6 +20,9 @@ public class BatchModeLoaderEntry {
             Usage();
         }
 
+        ResultFile resultFile = new ResultFile();
+        if (args.length >= 2)
+            resultFile = new ResultFile(args[1]);
         String loadParamFile = args[0];
         Gson gson = new Gson();
         BatchModeLoadParameters loadParameters;
@@ -37,7 +40,7 @@ public class BatchModeLoaderEntry {
 
         BatchModeLoader loaders[] = new BatchModeLoader[loadParameters.loadParameters.size()];
         for (int i = 0; i < loaders.length; i++) {
-            loaders[i] = new BatchModeLoader(loadParameters.loadParameters.get(i));
+            loaders[i] = new BatchModeLoader(loadParameters.loadParameters.get(i), resultFile);
         }
         for (int i = 0; i < loaders.length; i++) {
             loaders[i].start();
@@ -59,9 +62,11 @@ public class BatchModeLoaderEntry {
                 System.exit(1);
             }
         }
-        System.out.println(String.format("totalDuration=%d", totalDuration));
-        System.out.println(successStats.toString());
-        System.out.println(failedStats.toString());
+        resultFile.printResult(String.format("TotalDuration=%d", totalDuration));
+        resultFile.printResult("Success stats:");
+        resultFile.printResult(successStats.toString());
+        resultFile.printResult("Failed stats:");
+        resultFile.printResult(failedStats.toString());
         return;
     }
 }
