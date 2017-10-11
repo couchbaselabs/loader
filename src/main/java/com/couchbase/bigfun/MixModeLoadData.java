@@ -70,6 +70,7 @@ public class MixModeLoadData extends LoadData {
         if (removedKeys.size() >= this.deletedDocNumberThreshold) {
             String k = this.removedKeys.iterator().next();
             removedKeys.remove(k);
+            System.out.println(String.format("remove removedkey %s %d", k, removedKeys.size()));
             return k;
         }
         else
@@ -82,6 +83,7 @@ public class MixModeLoadData extends LoadData {
                     removedKeys.size(), ((operationIdEnd - operationIdStart + 1) / 2)));
         String k = getRandomNonRemovedKey();
         removedKeys.add(k);
+        System.out.println(String.format("add removedkey %s %d", k, removedKeys.size()));
         return k;
     }
 
