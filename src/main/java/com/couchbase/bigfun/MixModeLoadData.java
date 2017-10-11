@@ -29,6 +29,7 @@ public class MixModeLoadData extends LoadData {
     private long extraInsertIdStart;
     private long currentExtraInsertId;
     public long getCurrentExtraInsertId() {return this.currentExtraInsertId;};
+    public long getExtraInsertIds() {return this.currentExtraInsertId - this.extraInsertIdStart;}
 
     private JsonDocument templateDocuments[];
 

@@ -47,6 +47,8 @@ public class MixModeLoaderEntry {
             loaders[i].start();
         }
         long totalDuration = 0;
+        long removeSetNumber = 0;
+        long additionInsertNumber = 0;
         LoadStats successStats = new LoadStats();
         LoadStats failedStats = new LoadStats();
 
@@ -54,6 +56,8 @@ public class MixModeLoaderEntry {
             try {
                 loaders[i].join();
                 totalDuration += loaders[i].duration;
+                removeSetNumber += loaders[i].getData().getRemovedKeysNumber();
+                additionInsertNumber += loaders[i].getData().getExtraInsertIds();
                 successStats.add(loaders[i].successStats);
                 failedStats.add(loaders[i].failedStats);
             }
@@ -64,6 +68,8 @@ public class MixModeLoaderEntry {
             }
         }
         resultFile.printResult(String.format("TotalDuration=%d", totalDuration));
+        resultFile.printResult(String.format("RemoveSetNumber=%d", removeSetNumber));
+        resultFile.printResult(String.format("AdditionInsertNumber=%d", additionInsertNumber));
         resultFile.printResult("Success stats:");
         resultFile.printResult(successStats.toString());
         resultFile.printResult("Failed stats:");
