@@ -12,6 +12,7 @@
       <fileMode>0755</fileMode>
       <includes>
         <include>loader.sh</include>
+        <include>mixloader.sh</include>
       </includes>
       <outputDirectory>bin</outputDirectory>
     </fileSet>
