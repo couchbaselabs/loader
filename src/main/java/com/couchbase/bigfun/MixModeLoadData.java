@@ -77,7 +77,8 @@ public class MixModeLoadData extends LoadData {
 
     private String getRandomKeyToRemove() {
         if (removedKeys.size() >= ((operationIdEnd - operationIdStart + 1) / 2))
-            throw new RuntimeException("Too much documents removed");
+            throw new RuntimeException(String.format("Too much documents removed %d >= %d",
+                    removedKeys.size(), ((operationIdEnd - operationIdStart + 1) / 2)));
         String k = getRandomNonRemovedKey();
         removedKeys.add(k);
         return k;
