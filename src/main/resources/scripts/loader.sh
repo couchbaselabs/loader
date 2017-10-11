@@ -5,7 +5,17 @@ function loader() {
   local ROOT_DIR=$(dirname $BIN_DIR)
   local LIB_DIR=$ROOT_DIR/lib
 
-  local FileName=$1
+  Action=$1
+  shift
+  TableName=$1
+  shift
+  KeyField=$1
+  shift
+  Host=$1
+  shift
+  Bucket=$1
+  shift
+  Password=$1
   shift
 
   local CLASSPATH=
@@ -13,11 +23,21 @@ function loader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry $* > $FileName 
-  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $FileName 
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l 0 -h $Host -u $Bucket -p $Password -b $Bucket -o $Action -t 1#2 -U id#integer#1#100 > $TableName.$Action 
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $TableName.$Action
 }
 
-FileName=$1
+Action=$1
+shift
+TableName=$1
+shift
+KeyField=$1
+shift
+Host=$1
+shift
+Bucket=$1
+shift
+Password=$1
 shift
 
-loader $FileName $*
+loader $Action $TableName $KeyField $Host $Bucket $Password
