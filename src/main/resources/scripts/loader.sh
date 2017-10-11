@@ -5,12 +5,19 @@ function loader() {
   local ROOT_DIR=$(dirname $BIN_DIR)
   local LIB_DIR=$ROOT_DIR/lib
 
+  local FileName=$1
+  shift
+
   local CLASSPATH=
   for JAR in $(ls -1 $LIB_DIR/*.jar)
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.Loader $*
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry $* > $FileName 
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $FileName 
 }
 
-loader $*
+FileName=$1
+shift
+
+loader $FileName $*
