@@ -5,6 +5,8 @@ function mixloader() {
   local ROOT_DIR=$(dirname $BIN_DIR)
   local LIB_DIR=$ROOT_DIR/lib
 
+  ClientN=$1
+  shift
   DocNumber=$1
   shift
   TableName=$1
@@ -27,10 +29,12 @@ function mixloader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName.mixload 
-  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName.mixload $TableName.mixload.result
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName_$Host_$Bucket_$ClientN.mixload 
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName_$Host_$Bucket_$ClientN.mixload $TableName_$Host_$Bucket_$ClientN.mixload.result
 }
 
+ClientN=$1
+shift
 DocNumber=$1
 shift
 TableName=$1
@@ -48,4 +52,4 @@ shift
 Duration=$1
 shift
 
-mixloader $DocNumber $TableName $KeyField $Host $Bucket $Password $Interval $Duration $*
+mixloader $ClientN $DocNumber $TableName $KeyField $Host $Bucket $Password $Interval $Duration $*
