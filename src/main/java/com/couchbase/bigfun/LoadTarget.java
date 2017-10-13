@@ -68,9 +68,14 @@ public class LoadTarget {
         this.targetInfo = targetInfo;
         this.env = DefaultCouchbaseEnvironment.create();
         this.timeout = env.kvTimeout();
-        this.cluster = CouchbaseCluster.create(env, targetInfo.host);
-        this.bucket = targetInfo.password.equals("") ?
-                cluster.openBucket(targetInfo.bucket) : cluster.openBucket(targetInfo.bucket, targetInfo.password);
+        if (targetInfo.host.equals("")) {
+            this.cluster = null;
+            this.bucket = null;
+        } else {
+            this.cluster = CouchbaseCluster.create(env, targetInfo.host);
+            this.bucket = targetInfo.password.equals("") ?
+                    cluster.openBucket(targetInfo.bucket) : cluster.openBucket(targetInfo.bucket, targetInfo.password);
+        }
         this.cbasClient = HttpClientBuilder.create().build();
     }
 
@@ -234,15 +239,21 @@ public class LoadTarget {
     }
 
     protected void upsertWithoutRetry(JsonDocument doc) {
-        this.bucket.upsert(doc, PersistTo.NONE, timeout, TimeUnit.MILLISECONDS);
+        if (this.bucket != null) {
+            this.bucket.upsert(doc, PersistTo.NONE, timeout, TimeUnit.MILLISECONDS);
+        }
     }
 
     protected void deleteWithoutRetry(JsonDocument doc) {
-        this.bucket.remove(doc, PersistTo.NONE, timeout, TimeUnit.MILLISECONDS);
+        if (this.bucket != null) {
+            this.bucket.remove(doc, PersistTo.NONE, timeout, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void close() {
-        bucket.close();
-        cluster.disconnect();
+        if (bucket != null) {
+            bucket.close();
+            cluster.disconnect();
+        }
     }
 }

@@ -343,6 +343,18 @@ public class LoaderTest
         }
     }
 
+    public void testEmptyLoadTarget() {
+        TargetInfo targetinfo = new TargetInfo("", "", "bucket-1", "password", "");
+        LoadTarget target = new LoadTarget(targetinfo);
+        String key = "1";
+        String docJson = "{\"id\" : \"1\", \"updatefieldname\" : \"2000-01-02\", \"field2\" : \"abcd\"}";
+        JsonDocument doc = JsonDocument.create(key, JsonObject.fromJson(docJson));
+        target.upsert(doc);
+        target.delete(doc);
+        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from GleambookMessages;", 0);
+        assertTrue(o == null);
+    }
+
     // Env specific test, disabled by default remove "_" in method to enable
     public void _testLoadTarget()
     {
