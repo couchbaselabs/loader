@@ -29,8 +29,8 @@ function mixloader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName_$Host_$Bucket_$ClientN.mixload 
-  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName_$Host_$Bucket_$ClientN.mixload $TableName_$Host_$Bucket_$ClientN.mixload.result
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName.$Host.$Bucket.$ClientN.mixload 
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName.$Host.$Bucket.$ClientN.mixload $TableName.$Host.$Bucket.$ClientN.mixload.result
 }
 
 ClientN=$1

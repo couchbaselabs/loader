@@ -25,8 +25,8 @@ function loader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l 0 -h $Host -u $Bucket -p $Password -b $Bucket -o $Action $* > $TableName_$Host_$Bucket_$ClientN.$Action 
-  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $TableName_$Host_$Bucket_$ClientN.$Action $TableName_$Host_$Bucket_$ClientN.$Action.result
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d $TableName -k $KeyField -l 0 -h $Host -u $Bucket -p $Password -b $Bucket -o $Action $* > $TableName.$Host.$Bucket.$ClientN.$Action
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $TableName.$Host.$Bucket.$ClientN.$Action $TableName.$Host.$Bucket.$ClientN.$Action.result
 }
 
 ClientN=$1
