@@ -36,6 +36,7 @@ public abstract class LoadParametersGenerator {
         System.out.println("-qf <queryfile>");
         System.out.println("-nq <numberperquery>");
         System.out.println("-nm <partitionnumber>");
+        System.out.println("-qts <querytablesufix>");
     }
 
     protected void parseArguments() {
@@ -86,6 +87,8 @@ public abstract class LoadParametersGenerator {
                     case "-nm":
                         arguments.put("numPartition", Integer.valueOf(args[++i]));
                         break;
+                    case "-qts":
+                        arguments.put("queryTableSufix", args[++i]);
                 }
             }
             ++i;
@@ -131,9 +134,12 @@ public abstract class LoadParametersGenerator {
                 }
                 String filename = (String) arguments.get("queryFile");
                 List<String> querylist = Files.readAllLines(Paths.get(filename), Charset.defaultCharset());
+                String queryTableSufix = "";
+                if (arguments.containsKey("queryTableSufix"))
+                    queryTableSufix = (String)arguments.get("queryTableSufix");
                 for (String query : querylist) {
                     for (int i = 0; i < numberPerQuery; i++) {
-                        queryInfo.queries.add(query);
+                        queryInfo.queries.add(query.replaceAll("\\{TableSufix\\}", queryTableSufix));
                     }
                 }
             }

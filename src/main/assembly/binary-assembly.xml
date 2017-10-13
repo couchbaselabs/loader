@@ -13,6 +13,7 @@
       <includes>
         <include>loader.sh</include>
         <include>mixloader.sh</include>
+        <include>query.sh</include>
       </includes>
       <outputDirectory>bin</outputDirectory>
     </fileSet>
