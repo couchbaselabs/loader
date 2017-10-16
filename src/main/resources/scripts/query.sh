@@ -5,6 +5,8 @@ function loader() {
   local ROOT_DIR=$(dirname $BIN_DIR)
   local LIB_DIR=$ROOT_DIR/lib
 
+  DataPath=$1
+  shift
   ClientN=$1
   shift
   TableSufix=$1
@@ -25,10 +27,12 @@ function loader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry -P ../socialGen/bigfundata -d gbook_users -k id -l 0 -h "" -u $User -p $Password -b "" -o query -ah $Host -nm $Concurrent -qf ./target/loader-1.0-SNAPSHOT-binary-assembly/bin/query.txt -nq $Repeat -qts $TableSufix $* > $TableSufix.$Host.$ClientN.query
+  java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoadParametersGeneratorEntry -P $DataPath -d gbook_users -k id -l 0 -h "" -u $User -p $Password -b "" -o query -ah $Host -nm $Concurrent -qf ./target/loader-1.0-SNAPSHOT-binary-assembly/bin/query.txt -nq $Repeat -qts $TableSufix $* > $TableSufix.$Host.$ClientN.query
   java -cp $CLASSPATH com.couchbase.bigfun.BatchModeLoaderEntry $TableSufix.$Host.$ClientN.query $TableSufix.$Host.$ClientN.query.result
 }
 
+DataPath=$1
+shift
 ClientN=$1
 shift
 TableSufix=$1
@@ -44,4 +48,4 @@ shift
 Repeat=$1
 shift
 
-loader $ClientN $TableSufix $Host $User $Password $Concurrent $Repeat $*
+loader $DataPath $ClientN $TableSufix $Host $User $Password $Concurrent $Repeat $*
