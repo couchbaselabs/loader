@@ -99,7 +99,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
                     Date end = new Date();
                     this.successStats.queryNumber++;
                     this.successStats.queryLatency += end.getTime() - start.getTime();
-                    this.printResult(String.format("CBAS success query %s latency: %d, result count: %d, elapseTime: %s, executionTime: %s", query, end.getTime() - start.getTime(), queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
+                    this.printResult(String.format("CBAS success query:\t%s\tlatency:\t%d\tresult count:\t%d\telapseTime\t%s\texecutionTime:\t%s", query, end.getTime() - start.getTime(), queryResult.metrics.resultCount, queryResult.metrics.elapseTime, queryResult.metrics.executionTime));
                     result = true;
                 }
                 else
@@ -109,7 +109,7 @@ public class Loader<PARAMT, DATAT> extends Thread {
                 Date end = new Date();
                 this.failedStats.queryNumber++;
                 this.failedStats.queryLatency += end.getTime() - start.getTime();
-                this.printResult(String.format("CBAS failed query %s latency: %d", query, end.getTime() - start.getTime()));
+                this.printResult(String.format("CBAS failed query:\t%s\tlatency:\t%d", query, end.getTime() - start.getTime()));
                 throw e;
             }
             return result;
