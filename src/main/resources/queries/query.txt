@@ -19,10 +19,10 @@ Select value user from `GleambookUsers{TableSufix}` user where user.user_since >
 Select value user from `GleambookUsers{TableSufix}` user where user.user_since >= "2000-01-01T00:00:00" and user.user_since < "2000-02-01T00:00:00" and (every e in user.employment satisfies e.end_date is UNKNOWN);
 Select value user from `GleambookUsers{TableSufix}` user where user.user_since >= "2000-01-01T00:00:00" and user.user_since < "2001-01-01T00:00:00" and (every e in user.employment satisfies e.end_date is UNKNOWN);
 Select value user from `GleambookUsers{TableSufix}` user where user.user_since >= "2000-01-01T00:00:00" and user.user_since < "2014-01-01T00:00:00" and (every e in user.employment satisfies e.end_date is UNKNOWN);
-ARRAY_AVG(    (	Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-01-02T00:00:00"     ));
-ARRAY_AVG(    (	Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-02-01T00:00:00"     ));
-ARRAY_AVG(    (	Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2001-01-01T00:00:00"     ));
-ARRAY_AVG(    (	Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2014-01-01T00:00:00"     ));
+ARRAY_AVG((Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-01-02T00:00:00"));
+ARRAY_AVG((Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-02-01T00:00:00"));
+ARRAY_AVG((Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2001-01-01T00:00:00"));
+ARRAY_AVG((Select value length(cm.message_text) from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2014-01-01T00:00:00"));
 Select cm.user.screen_name as username, avg(length(cm.user.message_text)) as avg from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-01-02T00:00:00" group by cm.user.screen_name
 Select cm.user.screen_name as username, avg(length(cm.user.message_text)) as avg from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2000-02-01T00:00:00" group by cm.user.screen_name
 Select cm.user.screen_name as username, avg(length(cm.user.message_text)) as avg from `ChirpMessages{TableSufix}` cm where cm.send_time >= "2000-01-01T00:00:00" and cm.send_time < "2001-01-01T00:00:00" group by cm.user.screen_name
