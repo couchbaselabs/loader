@@ -31,7 +31,7 @@ public class MixModeLoadData extends LoadData {
     public long getCurrentExtraInsertId() {return this.currentExtraInsertId;};
     public long getExtraInsertIds() {return this.currentExtraInsertId - this.extraInsertIdStart;}
 
-    private JsonDocument templateDocuments[];
+    private JsonDocument loadDocuments[];
 
     private long deletedDocNumberThreshold;
 
@@ -57,8 +57,8 @@ public class MixModeLoadData extends LoadData {
 
     private String getRandomNonRemovedKey() {
         while (true) {
-            long key = operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart));
-            String keyStr = getFormatedKey(key);
+            int docIdx = random.nextInt(loadDocuments.length);
+            String keyStr = this.loadDocuments[docIdx].id();
             if (removedKeys.contains(keyStr)) {
                 continue;
             }
@@ -70,7 +70,6 @@ public class MixModeLoadData extends LoadData {
         if (removedKeys.size() >= this.deletedDocNumberThreshold) {
             String k = this.removedKeys.iterator().next();
             removedKeys.remove(k);
-            //System.out.println(String.format("remove removedkey %s %d", k, removedKeys.size()));
             return k;
         }
         else
@@ -78,12 +77,11 @@ public class MixModeLoadData extends LoadData {
     }
 
     private String getRandomKeyToRemove() {
-        if (removedKeys.size() >= ((operationIdEnd - operationIdStart + 1) / 2))
+        if (removedKeys.size() >= (loadDocuments.length / 2))
             throw new RuntimeException(String.format("Too much documents removed %d >= %d",
-                    removedKeys.size(), ((operationIdEnd - operationIdStart + 1) / 2)));
+                    removedKeys.size(), (loadDocuments.length / 2)));
         String k = getRandomNonRemovedKey();
         removedKeys.add(k);
-        //System.out.println(String.format("add removedkey %s %d", k, removedKeys.size()));
         return k;
     }
 
@@ -92,8 +90,8 @@ public class MixModeLoadData extends LoadData {
     }
 
     private JsonDocument getRandomDocumentTemplate() {
-        int docIdx = random.nextInt(templateDocuments.length);
-        return this.templateDocuments[docIdx];
+        int docIdx = random.nextInt(loadDocuments.length);
+        return this.loadDocuments[docIdx];
     }
 
     @Override
@@ -182,15 +180,15 @@ public class MixModeLoadData extends LoadData {
         }
 
         try {
-            this.templateDocuments = new JsonDocument[(int)dataInfo.docsToLoad];
+            this.loadDocuments = new JsonDocument[(int)dataInfo.docsToLoad];
             BufferedReader br = new BufferedReader(new FileReader(this.dataInfo.dataFilePath));
             for (int i = 0; i < this.dataInfo.docsToLoad; i++) {
                 String line = br.readLine();
                 if (line == null)
                     break;
                 JsonObject obj = JsonObject.fromJson(line);
-                String id = String.valueOf(obj.get(this.dataInfo.keyFieldName));
-                this.templateDocuments[i] = JsonDocument.create(id, obj);
+                String id = getFormatedKey(Long.valueOf(String.valueOf(obj.get(this.dataInfo.keyFieldName))));
+                this.loadDocuments[i] = JsonDocument.create(id, obj);
             }
         }
         catch (IOException e)
