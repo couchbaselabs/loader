@@ -187,7 +187,7 @@ public class MixModeLoadData extends LoadData {
                 if (line == null)
                     break;
                 JsonObject obj = JsonObject.fromJson(line);
-                String id = getFormatedKey(Long.valueOf(String.valueOf(obj.get(this.dataInfo.keyFieldName))));
+                String id = String.valueOf(obj.get(this.dataInfo.keyFieldName));
                 this.loadDocuments[i] = JsonDocument.create(id, obj);
             }
         }

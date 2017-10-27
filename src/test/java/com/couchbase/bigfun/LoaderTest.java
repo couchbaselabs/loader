@@ -667,9 +667,13 @@ public class LoaderTest
     }
 
     private String[] initializeJsonDocs(int size) {
+        return initializeJsonDocs(size, "%d");
+    }
+
+    private String[] initializeJsonDocs(int size, String idFormat) {
         String docContents[] = new String[size];
         for (int i = 0; i < size; i++) {
-            String content = String.format("{\"id\":%d, \"intfield\":1000000000000, \"floatfield\":1.1, \"datefield\":\"2000-01-01\", \"timefield\":\"2001-01-01T00:00:00\", \"strsfield\":\"str1\", \"strfmtfield\":\"strfmt001\"}", i + 1);
+            String content = String.format("{\"id\":%s, \"intfield\":1000000000000, \"floatfield\":1.1, \"datefield\":\"2000-01-01\", \"timefield\":\"2001-01-01T00:00:00\", \"strsfield\":\"str1\", \"strfmtfield\":\"strfmt001\"}", String.format(idFormat, i + 1));
             docContents[i] = content;
         }
         return docContents;
@@ -1146,7 +1150,7 @@ public class LoaderTest
     public void testMixModeLoadDataFormatedID() {
         String dataFile = "data.json";
         String metaFile = "data.meta";
-        String docContents[] = initializeJsonDocs(200);
+        String docContents[] = initializeJsonDocs(200, "\"%015d\"");
         DataInfo dataInfo = new DataInfo(dataFile, metaFile, "id", docContents.length);
         createFileWithContents(dataFile, docContents);
 
