@@ -58,7 +58,7 @@ public class MixModeLoadData extends LoadData {
 
     private String getRandomNonRemovedKey() {
         while (true) {
-            long key = operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart));
+            long key = operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart + 1));
             String keyStr = getFormatedKey(key);
             if (this.loadDocuments != null) {
                 int docIdx = random.nextInt(loadDocuments.length);
