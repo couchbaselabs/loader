@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -673,7 +674,7 @@ public class LoaderTest
     private String[] initializeJsonDocs(int size, String idFormat) {
         String docContents[] = new String[size];
         for (int i = 0; i < size; i++) {
-            String content = String.format("{\"id\":%s, \"intfield\":1000000000000, \"floatfield\":1.1, \"datefield\":\"2000-01-01\", \"timefield\":\"2001-01-01T00:00:00\", \"strsfield\":\"str1\", \"strfmtfield\":\"strfmt001\"}", String.format(idFormat, i + 1));
+            String content = String.format("{\"id\":%s, \"idbak\":%d, \"intfield\":1000000000000, \"floatfield\":1.1, \"datefield\":\"2000-01-01\", \"timefield\":\"2001-01-01T00:00:00\", \"strsfield\":\"str1\", \"strfmtfield\":\"strfmt001\"}", String.format(idFormat, i + 1), i + 1);
             docContents[i] = content;
         }
         return docContents;
@@ -1123,6 +1124,132 @@ public class LoaderTest
         data.close();
     }
 
+    public void testMixModeLoadDataContent() {
+        String dataFile = "data.json";
+        String metaFile = "data.meta";
+        String docContents[] = initializeJsonDocs(200);
+        DataInfo dataInfo = new DataInfo(dataFile, metaFile, "id", 5);
+        createFileWithContents(dataFile, docContents);
+
+        String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length)};
+        createFileWithContents(metaFile, contentsMeta);
+
+        QueryInfo queryInfo = new QueryInfo();
+        long insertIdStart = 1000000000;
+        int maxDeleteIds = 0;
+        int expiryEnd = 2;
+        MixModeInsertParameter insertParam = new MixModeInsertParameter(insertIdStart);
+        MixModeDeleteParameter delParam = new MixModeDeleteParameter(maxDeleteIds);
+        MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, expiryEnd);
+        MixModeLoadData data = new MixModeLoadData(dataInfo, queryInfo, insertParam, delParam, ttlParameter);
+        JsonDocument doc = null;
+        HashSet<Integer> ids = new HashSet<Integer>();
+        HashSet<Integer> idbaks = new HashSet<Integer>();
+        int idbakdiffcount = 0;
+        for (int i = 0; i < 400; i = i + 5) {
+            doc = data.GetNextDocumentForDelete();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForTTL();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForInsert();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForInsert();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForUpdate();
+            ids.add(Integer.parseInt(doc.id()));
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+        }
+        assertTrue(ids.size() == 5);
+        assertTrue(idbaks.size() == 5);
+        assertTrue(idbakdiffcount > 200);
+        for (int i = 1; i <= 5; i++) {
+            assertTrue(ids.contains(i));
+            assertTrue(idbaks.contains(i));
+        }
+    }
+
+    public void testMixModeLoadDataContent0InMem() {
+        String dataFile = "data.json";
+        String metaFile = "data.meta";
+        String docContents[] = initializeJsonDocs(200);
+        DataInfo dataInfo = new DataInfo(dataFile, metaFile, "id", 0);
+        createFileWithContents(dataFile, docContents);
+
+        String contentsMeta[] = {String.format("IDRange=1:%d", docContents.length)};
+        createFileWithContents(metaFile, contentsMeta);
+
+        QueryInfo queryInfo = new QueryInfo();
+        long insertIdStart = 1000000000;
+        int maxDeleteIds = 0;
+        int expiryEnd = 2;
+        MixModeInsertParameter insertParam = new MixModeInsertParameter(insertIdStart);
+        MixModeDeleteParameter delParam = new MixModeDeleteParameter(maxDeleteIds);
+        MixModeTTLParameter ttlParameter = new MixModeTTLParameter(1, expiryEnd);
+        MixModeLoadData data = new MixModeLoadData(dataInfo, queryInfo, insertParam, delParam, ttlParameter);
+        JsonDocument doc = null;
+        HashSet<Integer> ids = new HashSet<Integer>();
+        HashSet<Integer> idbaks = new HashSet<Integer>();
+        int idbakdiffcount = 0;
+        for (int i = 0; i < 400; i = i + 5) {
+            doc = data.GetNextDocumentForDelete();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            assertTrue((int)doc.content().get("idbak") == (i % 200) + 1);
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForTTL();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            assertTrue((int)doc.content().get("idbak") == (i % 200) + 2);
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForInsert();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            assertTrue((int)doc.content().get("idbak") == (i % 200) + 3);
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForInsert();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            assertTrue((int)doc.content().get("idbak") == (i % 200) + 4);
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+            doc = data.GetNextDocumentForUpdate();
+            ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
+            assertTrue((int)doc.content().get("idbak") == (i % 200) + 5);
+            if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
+                idbakdiffcount ++;
+            assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
+        }
+        assertTrue(ids.size() > 100);
+        assertTrue(idbaks.size() == 200);
+        assertTrue(idbakdiffcount > 200);
+    }
+
     public void testMixModeLoadData() {
         String dataFile = "data.json";
         String metaFile = "data.meta";
@@ -1178,8 +1305,8 @@ public class LoaderTest
         assertTrue(data.getCurrentExtraInsertId() == insertIdStart+1);
         for (int i = 0; i < 9; i ++) {
             doc = data.GetNextDocumentForDelete();
-            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
             assertTrue(data.getRemovedKeysNumber() == i + 1);
         }
 
@@ -1188,29 +1315,29 @@ public class LoaderTest
         assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
 
         doc = data.GetNextDocumentForDelete();
-        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
         assertTrue(data.getRemovedKeysNumber() == maxDeleteIds);
 
         doc = data.GetNextDocumentForInsert();
-        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
         assertTrue(data.getCurrentExtraInsertId() == insertIdStart+2);
         assertTrue(data.getRemovedKeysNumber() == maxDeleteIds - 1);
 
         doc = data.GetNextDocumentForDelete();
-        assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+        assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+        assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
         assertTrue(data.getRemovedKeysNumber() == maxDeleteIds);
 
         for (int i = 0; i < 45; i ++) {
             doc = data.GetNextDocumentForTTL();
-            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
             assertTrue(data.getRemovedKeysNumber() == maxDeleteIds + 1 + i * 2);
             doc = data.GetNextDocumentForDelete();
-            assertTrue(doc.id().equals(String.format(idFormat, Long.valueOf(doc.id()))));
-            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.valueOf(doc.id()) <= docNum);
+            assertTrue(doc.id().equals(String.format(idFormat, Long.parseLong(doc.id()))));
+            assertTrue(Long.valueOf(doc.id()) >= 1 && Long.parseLong(doc.id()) <= docNum);
             assertTrue(data.getRemovedKeysNumber() == maxDeleteIds + 2 + i * 2);
         }
 

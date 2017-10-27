@@ -58,7 +58,7 @@ public abstract class LoadParametersGenerator {
                         arguments.put("dataFile", args[++i]);
                         break;
                     case "-l":
-                        arguments.put("docToLoad", Long.valueOf(args[++i]));
+                        arguments.put("docToLoad", Long.parseLong(args[++i]));
                         break;
                     case "-h":
                         arguments.put("host", args[++i]);
@@ -82,10 +82,10 @@ public abstract class LoadParametersGenerator {
                         arguments.put("queryFile", args[++i]);
                         break;
                     case "-nq":
-                        arguments.put("numberPerQuery", Integer.valueOf(args[++i]));
+                        arguments.put("numberPerQuery", Integer.parseInt(args[++i]));
                         break;
                     case "-nm":
-                        arguments.put("numPartition", Integer.valueOf(args[++i]));
+                        arguments.put("numPartition", Integer.parseInt(args[++i]));
                         break;
                     case "-qts":
                         arguments.put("queryTableSufix", args[++i]);
@@ -102,8 +102,8 @@ public abstract class LoadParametersGenerator {
         if (parts.length != 2)
             throw new IllegalArgumentException("Invalid TTL parameter " + arg);
         try {
-            int ttlStart = Integer.valueOf(parts[0]);
-            int ttlEnd = Integer.valueOf(parts[1]);
+            int ttlStart = Integer.parseInt(parts[0]);
+            int ttlEnd = Integer.parseInt(parts[1]);
             arguments.put("ttlStart", ttlStart);
             arguments.put("ttlEnd", ttlEnd);
         }

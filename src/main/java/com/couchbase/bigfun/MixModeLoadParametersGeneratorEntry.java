@@ -49,37 +49,37 @@ public class MixModeLoadParametersGeneratorEntry extends LoadParametersGenerator
                             parseTTLArg(arguments, args[++i]);
                             break;
                         case "-iv":
-                            arguments.put("intervalMS", Integer.valueOf(args[++i]));
+                            arguments.put("intervalMS", Integer.parseInt(args[++i]));
                             break;
                         case "-du":
-                            arguments.put("durationSeconds", Integer.valueOf(args[++i]));
+                            arguments.put("durationSeconds", Integer.parseInt(args[++i]));
                             break;
                         case "-st":
                             parseTime(arguments, "startTime", args[++i]);
                             break;
                         case "-ip":
-                            arguments.put("insertPropotion", Integer.valueOf(args[++i]));
+                            arguments.put("insertPropotion", Integer.parseInt(args[++i]));
                             break;
                         case "-dp":
-                            arguments.put("deletePropotion", Integer.valueOf(args[++i]));
+                            arguments.put("deletePropotion", Integer.parseInt(args[++i]));
                             break;
                         case "-up":
-                            arguments.put("updatePropotion", Integer.valueOf(args[++i]));
+                            arguments.put("updatePropotion", Integer.parseInt(args[++i]));
                             break;
                         case "-tp":
-                            arguments.put("ttlPropotion", Integer.valueOf(args[++i]));
+                            arguments.put("ttlPropotion", Integer.parseInt(args[++i]));
                             break;
                         case "-qp":
-                            arguments.put("queryPropotion", Integer.valueOf(args[++i]));
+                            arguments.put("queryPropotion", Integer.parseInt(args[++i]));
                             break;
                         case "-md":
-                            arguments.put("maxDeleteDocs", Long.valueOf(args[++i]));
+                            arguments.put("maxDeleteDocs", Long.parseLong(args[++i]));
                             break;
                         case "-is":
-                            arguments.put("insertIdStart", Long.valueOf(args[++i]));
+                            arguments.put("insertIdStart", Long.parseLong(args[++i]));
                             break;
                         case "-ir":
-                            arguments.put("insertIdRange", Long.valueOf(args[++i]));
+                            arguments.put("insertIdRange", Long.parseLong(args[++i]));
                             break;
                     }
                 }

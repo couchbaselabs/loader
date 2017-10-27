@@ -22,9 +22,9 @@ public class JsonObjectUpdater {
         try {
             switch (this.updateParameter.updateFieldType) {
                 case INTEGER_TYPE: {
-                    Long s = Long.parseLong(this.updateParameter.updateValueStart);
-                    Long e = Long.parseLong(this.updateParameter.updateValueEnd);
-                    Long v = s + (long) (random.nextDouble() * (e - s));
+                    long s = Long.parseLong(this.updateParameter.updateValueStart);
+                    long e = Long.parseLong(this.updateParameter.updateValueEnd);
+                    long v = s + (long) (random.nextDouble() * (e - s));
                     obj.put(this.updateParameter.updateFieldName, v);
                     break;
                 }
@@ -37,18 +37,18 @@ public class JsonObjectUpdater {
                 }
                 case DATE_TYPE: {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                    Long s = formatter.parse(this.updateParameter.updateValueStart).getTime();
-                    Long e = formatter.parse(this.updateParameter.updateValueEnd).getTime();
-                    Long msv = s + (long) (random.nextDouble() * (e - s));
+                    long s = formatter.parse(this.updateParameter.updateValueStart).getTime();
+                    long e = formatter.parse(this.updateParameter.updateValueEnd).getTime();
+                    long msv = s + (long) (random.nextDouble() * (e - s));
                     String v = formatter.format(new Date(msv));
                     obj.put(this.updateParameter.updateFieldName, v);
                     break;
                 }
                 case TIME_TYPE: {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                    Long s = formatter.parse(this.updateParameter.updateValueStart).getTime();
-                    Long e = formatter.parse(this.updateParameter.updateValueEnd).getTime();
-                    Long msv = s + (long) (random.nextDouble() * (e - s));
+                    long s = formatter.parse(this.updateParameter.updateValueStart).getTime();
+                    long e = formatter.parse(this.updateParameter.updateValueEnd).getTime();
+                    long msv = s + (long) (random.nextDouble() * (e - s));
                     String v = formatter.format(new Date(msv));
                     obj.put(this.updateParameter.updateFieldName, v);
                     break;
@@ -59,9 +59,9 @@ public class JsonObjectUpdater {
                         String v = this.updateValues.get(vidx);
                         obj.put(this.updateParameter.updateFieldName, v);
                     } else if (this.updateParameter.updateValueFormat != null && (!this.updateParameter.updateValueFormat.equals(""))) {
-                        Long s = Long.parseLong(this.updateParameter.updateValueStart);
-                        Long e = Long.parseLong(this.updateParameter.updateValueEnd);
-                        Long v = s + (long) (random.nextDouble() * (e - s));
+                        long s = Long.parseLong(this.updateParameter.updateValueStart);
+                        long e = Long.parseLong(this.updateParameter.updateValueEnd);
+                        long v = s + (long) (random.nextDouble() * (e - s));
                         obj.put(this.updateParameter.updateFieldName, String.format(this.updateParameter.updateValueFormat, v));
                     }
                     break;
