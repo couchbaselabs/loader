@@ -1154,6 +1154,7 @@ public class LoaderTest
                 idbakdiffcount ++;
             assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
             doc = data.GetNextDocumentForTTL();
+            assertTrue(doc.expiry() <= expiryEnd && doc.expiry() >= 1);
             ids.add(Integer.parseInt(doc.id()));
             idbaks.add((int)doc.content().get("idbak"));
             if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
@@ -1219,6 +1220,7 @@ public class LoaderTest
             doc = data.GetNextDocumentForTTL();
             ids.add(Integer.parseInt(doc.id()));
             idbaks.add((int)doc.content().get("idbak"));
+            assertTrue(doc.expiry() <= expiryEnd && doc.expiry() >= 1);
             assertTrue((int)doc.content().get("idbak") == (i % 200) + 2);
             if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
                 idbakdiffcount ++;

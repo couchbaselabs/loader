@@ -106,7 +106,10 @@ public class MixModeLoadData extends LoadData {
         if (this.loadDocuments != null) {
             int docIdx = random.nextInt(loadDocuments.length);
             this.loadDocuments[docIdx].content().put(this.dataInfo.keyFieldName, key);
-            result = JsonDocument.create(key, this.loadDocuments[docIdx].content());
+            if (expiry == -1)
+                result = JsonDocument.create(key, this.loadDocuments[docIdx].content());
+            else
+                result = JsonDocument.create(key, expiry, this.loadDocuments[docIdx].content());
         }
         else if (this.dataReader != null){
             try {
