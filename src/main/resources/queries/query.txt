@@ -1,3 +1,4 @@
+#Comment
 Select count(*) from `GleambookUsers{TableSufix}`;
 Select * from `GleambookUsers{TableSufix}` limit 10;
 Select count(*) from `GleambookMessages{TableSufix}`;
