@@ -138,8 +138,10 @@ public abstract class LoadParametersGenerator {
                 if (arguments.containsKey("queryTableSufix"))
                     queryTableSufix = (String)arguments.get("queryTableSufix");
                 for (String query : querylist) {
-                    for (int i = 0; i < numberPerQuery; i++) {
-                        queryInfo.queries.add(query.replaceAll("\\{TableSufix\\}", queryTableSufix));
+                    if (!query.startsWith("#")) {
+                        for (int i = 0; i < numberPerQuery; i++) {
+                            queryInfo.queries.add(query.replaceAll("\\{TableSufix\\}", queryTableSufix));
+                        }
                     }
                 }
             }
