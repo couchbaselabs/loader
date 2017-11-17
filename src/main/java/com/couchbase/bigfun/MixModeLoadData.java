@@ -31,7 +31,8 @@ public class MixModeLoadData extends LoadData {
     public long getCurrentExtraInsertId() {return this.currentExtraInsertId;};
     public long getExtraInsertIds() {return this.currentExtraInsertId - this.extraInsertIdStart;}
 
-    private JsonDocument loadDocuments[];
+    private String loadDocuments[];
+    private String loadKeys[];
     private BufferedReader dataReader;
 
     private long deletedDocNumberThreshold;
@@ -62,7 +63,7 @@ public class MixModeLoadData extends LoadData {
             String keyStr = getFormatedKey(key);
             if (this.loadDocuments != null) {
                 int docIdx = random.nextInt(loadDocuments.length);
-                keyStr = this.loadDocuments[docIdx].id();
+                keyStr = this.loadKeys[docIdx];
             }
             if (removedKeys.contains(keyStr)) {
                 continue;
@@ -105,11 +106,12 @@ public class MixModeLoadData extends LoadData {
         JsonDocument result = null;
         if (this.loadDocuments != null) {
             int docIdx = random.nextInt(loadDocuments.length);
-            this.loadDocuments[docIdx].content().put(this.dataInfo.keyFieldName, key);
+            JsonObject obj = JsonObject.fromJson(loadDocuments[docIdx]);
+            obj.put(this.dataInfo.keyFieldName, key);
             if (expiry == -1)
-                result = JsonDocument.create(key, this.loadDocuments[docIdx].content());
+                result = JsonDocument.create(key, obj);
             else
-                result = JsonDocument.create(key, expiry, this.loadDocuments[docIdx].content());
+                result = JsonDocument.create(key, expiry, obj);
         }
         else if (this.dataReader != null){
             try {
@@ -223,6 +225,7 @@ public class MixModeLoadData extends LoadData {
         if (dataInfo.docsToLoad == 0) {
             try {
                 this.loadDocuments = null;
+                this.loadKeys = null;
                 this.dataReader = new BufferedReader(new FileReader(this.dataInfo.dataFilePath));
             }
             catch (IOException e) {
@@ -231,7 +234,8 @@ public class MixModeLoadData extends LoadData {
         }
         else {
             this.dataReader = null;
-            this.loadDocuments = new JsonDocument[(int) dataInfo.docsToLoad];
+            this.loadDocuments = new String[(int) dataInfo.docsToLoad];
+            this.loadKeys = new String[(int) dataInfo.docsToLoad];
             try (BufferedReader br = new BufferedReader(new FileReader(this.dataInfo.dataFilePath))){
                 for (int i = 0; i < this.dataInfo.docsToLoad; i++) {
                     String line = br.readLine();
@@ -239,7 +243,8 @@ public class MixModeLoadData extends LoadData {
                         break;
                     JsonObject obj = JsonObject.fromJson(line);
                     String id = String.valueOf(obj.get(this.dataInfo.keyFieldName));
-                    this.loadDocuments[i] = JsonDocument.create(id, obj);
+                    this.loadDocuments[i] = line;
+                    this.loadKeys[i] = id;
                 }
             } catch (IOException e) {
                 throw new IllegalArgumentException("Invalid data file path");

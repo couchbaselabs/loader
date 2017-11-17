@@ -9,7 +9,7 @@ function mixloader() {
   shift
   ClientN=$1
   shift
-  DocNumber=0
+  DocNumber=$1
   shift
   TableName=$1
   shift
@@ -31,15 +31,15 @@ function mixloader() {
   do
     CLASSPATH=$CLASSPATH:$JAR
   done
-  java -Xmx10240m -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P $DataPath -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName.$Host.$Bucket.$ClientN.mixload 
-  java -Xmx10240m -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName.$Host.$Bucket.$ClientN.mixload $TableName.$Host.$Bucket.$ClientN.mixload.result
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoadParametersGeneratorEntry -P $DataPath -d $TableName -k $KeyField -l $DocNumber -h $Host -u $Bucket -p $Password -b $Bucket -iv $Interval -du $Duration $* > $TableName.$Host.$Bucket.$ClientN.mixload 
+  java -cp $CLASSPATH com.couchbase.bigfun.MixModeLoaderEntry $TableName.$Host.$Bucket.$ClientN.mixload $TableName.$Host.$Bucket.$ClientN.mixload.result
 }
 
 DataPath=$1
 shift
 ClientN=$1
 shift
-DocNumber=0
+DocNumber=$1
 shift
 TableName=$1
 shift
