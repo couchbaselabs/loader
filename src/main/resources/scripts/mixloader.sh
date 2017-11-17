@@ -9,7 +9,7 @@ function mixloader() {
   shift
   ClientN=$1
   shift
-  DocNumber=$1
+  DocNumber=0
   shift
   TableName=$1
   shift
@@ -39,7 +39,7 @@ DataPath=$1
 shift
 ClientN=$1
 shift
-DocNumber=$1
+DocNumber=0
 shift
 TableName=$1
 shift
