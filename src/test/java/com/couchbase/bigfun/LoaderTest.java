@@ -1174,12 +1174,13 @@ public class LoaderTest
             assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
             doc = data.GetNextDocumentForUpdate();
             ids.add(Integer.parseInt(doc.id()));
+            idbaks.add((int)doc.content().get("idbak"));
             if ( (int)doc.content().get("idbak") != Integer.parseInt(doc.id()))
                 idbakdiffcount ++;
             assertTrue(Integer.parseInt(doc.id()) == Integer.parseInt((String)doc.content().get("id")));
         }
         assertTrue(ids.size() == 5);
-        assertTrue(idbaks.size() == 5);
+        assertTrue(idbaks.size() == 200);
         assertTrue(idbakdiffcount > 200);
         for (int i = 1; i <= 5; i++) {
             assertTrue(ids.contains(i));

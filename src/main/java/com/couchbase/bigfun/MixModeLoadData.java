@@ -31,8 +31,6 @@ public class MixModeLoadData extends LoadData {
     public long getCurrentExtraInsertId() {return this.currentExtraInsertId;};
     public long getExtraInsertIds() {return this.currentExtraInsertId - this.extraInsertIdStart;}
 
-    private String loadDocuments[];
-    private String loadKeys[];
     private BufferedReader dataReader;
 
     private long deletedDocNumberThreshold;
@@ -61,10 +59,6 @@ public class MixModeLoadData extends LoadData {
         while (true) {
             long key = operationIdStart + (long) (random.nextDouble() * (operationIdEnd - operationIdStart + 1));
             String keyStr = getFormatedKey(key);
-            if (this.loadDocuments != null) {
-                int docIdx = random.nextInt(loadDocuments.length);
-                keyStr = this.loadKeys[docIdx];
-            }
             if (removedKeys.contains(keyStr)) {
                 continue;
             }
@@ -84,9 +78,6 @@ public class MixModeLoadData extends LoadData {
 
     private String getRandomKeyToRemove() {
         long removelimit = (operationIdEnd - operationIdStart + 1) / 2;
-        if (this.loadDocuments != null) {
-            removelimit = loadDocuments.length / 2;
-        }
         if (removedKeys.size() >= removelimit)
             throw new RuntimeException(String.format("Too much documents removed %d >= %d",
                     removedKeys.size(), removelimit));
@@ -104,16 +95,7 @@ public class MixModeLoadData extends LoadData {
     }
     private JsonDocument getNextDocument(String key, int expiry) {
         JsonDocument result = null;
-        if (this.loadDocuments != null) {
-            int docIdx = random.nextInt(loadDocuments.length);
-            JsonObject obj = JsonObject.fromJson(loadDocuments[docIdx]);
-            obj.put(this.dataInfo.keyFieldName, key);
-            if (expiry == -1)
-                result = JsonDocument.create(key, obj);
-            else
-                result = JsonDocument.create(key, expiry, obj);
-        }
-        else if (this.dataReader != null){
+        if (this.dataReader != null){
             try {
                 String line = this.dataReader.readLine();
                 if (line == null) {
@@ -222,33 +204,14 @@ public class MixModeLoadData extends LoadData {
             throw new IllegalArgumentException("Invalid meta file path");
         }
 
-        if (dataInfo.docsToLoad == 0) {
-            try {
-                this.loadDocuments = null;
-                this.loadKeys = null;
-                this.dataReader = new BufferedReader(new FileReader(this.dataInfo.dataFilePath));
+        try {
+            if (dataInfo.docsToLoad != 0) {
+                this.operationIdEnd = this.operationIdStart + dataInfo.docsToLoad - 1;
             }
-            catch (IOException e) {
-                throw new IllegalArgumentException("Invalid data file path");
-            }
+            this.dataReader = new BufferedReader(new FileReader(this.dataInfo.dataFilePath));
         }
-        else {
-            this.dataReader = null;
-            this.loadDocuments = new String[(int) dataInfo.docsToLoad];
-            this.loadKeys = new String[(int) dataInfo.docsToLoad];
-            try (BufferedReader br = new BufferedReader(new FileReader(this.dataInfo.dataFilePath))){
-                for (int i = 0; i < this.dataInfo.docsToLoad; i++) {
-                    String line = br.readLine();
-                    if (line == null)
-                        break;
-                    JsonObject obj = JsonObject.fromJson(line);
-                    String id = String.valueOf(obj.get(this.dataInfo.keyFieldName));
-                    this.loadDocuments[i] = line;
-                    this.loadKeys[i] = id;
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Invalid data file path");
-            }
+        catch (IOException e) {
+            throw new IllegalArgumentException("Invalid data file path");
         }
 
         for (String query : queryInfo.queries) {
