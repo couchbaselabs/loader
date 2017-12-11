@@ -196,8 +196,13 @@ public class LoadTarget {
     }
 
     private String createCbasQueryJson(String query) {
+        return this.createCbasQueryJson(query, 900);
+    }
+
+    private String createCbasQueryJson(String query, int timeout) {
         JsonObject queryObj = JsonObject.create();
         queryObj.put("statement", query);
+        queryObj.put("timeout", String.format("%ds", timeout));
         queryObj.put("pretty", true);
         return queryObj.toString();
     }
