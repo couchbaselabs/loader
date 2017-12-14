@@ -247,6 +247,7 @@ public class LoadTarget {
                     }
                     System.out.println(this.getCurrentTime() + "+++ new timeout " + timeout + " +++");
                 } else {
+                    System.out.println(this.getCurrentTime() + "+++ throw " + e.toString() + " +++");
                     throw e;
                 }
             }
