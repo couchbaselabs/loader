@@ -11,6 +11,8 @@ import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.couchbase.client.java.error.TemporaryFailureException;
 
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.lang.Thread;
@@ -64,6 +66,12 @@ public class LoadTarget {
     protected long timeout;
     private HttpClient cbasClient;
 
+    private String getCurrentTime() {
+        Date d = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        return sf.format(d);
+    }
+
     public LoadTarget(TargetInfo targetInfo) {
         this.targetInfo = targetInfo;
         this.env = DefaultCouchbaseEnvironment.create();
@@ -102,18 +110,20 @@ public class LoadTarget {
                     post.setEntity(new StringEntity(data));
                     HttpResponse response = cbasClient.execute(post);
                     if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                        System.out.println(this.getCurrentTime() + String.format(" Invalid query call with status code %d", response.getStatusLine().getStatusCode()));
                         throw new RuntimeException(String.format("Invalid query call with status code %d", response.getStatusLine().getStatusCode()));
                     }
                     result = parseCbasQueryResultStream(response.getEntity().getContent());
                     break;
                 } catch (IOException e) {
-                    System.out.println("IOException occured while sending http request : " + e);
+                    System.out.println(this.getCurrentTime() + " IOException occured while sending http request : " + e);
                     if (retryCnt++ > retryNum) {
+                        System.out.println(this.getCurrentTime() + " Retry too much times after IOException");
                         throw new RuntimeException("Retry too much times after IOException", e);
                     }
                     try {
                         Thread.sleep(this.timeout);
-                        System.out.println(String.format("Retry %d after IOException", retryCnt));
+                        System.out.println(this.getCurrentTime() + String.format(" Retry %d after IOException", retryCnt));
                     }
                     catch (InterruptedException ie) {
                         System.err.println(e.toString());
@@ -227,7 +237,7 @@ public class LoadTarget {
                 break;
             } catch (RuntimeException e) {
                 if (e instanceof TemporaryFailureException || e.getCause() instanceof TimeoutException) {
-                    System.out.println("+++ caught " + e.toString() + " +++");
+                    System.out.println(this.getCurrentTime() + "+++ caught " + e.toString() + " +++");
                     try {
                         Thread.sleep(this.timeout);
                     }
@@ -235,7 +245,7 @@ public class LoadTarget {
                         System.err.println(e.toString());
                         System.exit(-1);
                     }
-                    System.out.println("+++ new timeout " + timeout + " +++");
+                    System.out.println(this.getCurrentTime() + "+++ new timeout " + timeout + " +++");
                 } else {
                     throw e;
                 }

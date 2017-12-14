@@ -5,14 +5,21 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.IOException;
 import java.io.Closeable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ResultFile implements Closeable {
     private PrintStream stream = null;
 
+    private String getCurrentTime() {
+        Date d = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        return sf.format(d);
+    }
+
     public void printResult(String result) {
-        if (stream == null) {
-            System.out.println(result);
-        } else {
+        System.out.println(this.getCurrentTime() + " " + result);
+        if (stream != null) {
             stream.println(result);
         }
         return;

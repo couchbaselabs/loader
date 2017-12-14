@@ -12,6 +12,8 @@ import com.google.gson.Gson;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import java.io.FileWriter;
@@ -50,6 +52,9 @@ public class LoaderTest
      * Rigourous Test :-)
      */
     public void testGson() {
+        Date d = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        String ds = sf.format(d);
         Book book = new Book("a", "b1", "b2", "title", 100);
         Gson gson = new Gson();
         String bookjson = gson.toJson(book);
@@ -366,12 +371,12 @@ public class LoaderTest
         JsonDocument doc = JsonDocument.create(key, JsonObject.fromJson(docJson));
         target.upsert(doc);
         target.delete(doc);
-        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from GleambookMessages;", 0);
+        LoadTarget.CBASQueryResult o = target.cbasQuery("select count(*) from `GleambookMessagesbucket-1`;", 0);
         assertTrue(o != null);
         assertTrue(o.status.equals("success"));
         assertTrue(o.metrics.resultCount == 1);
         try {
-            o = target.cbasQuery("select count(*) from GleambookMessage", 0);
+            o = target.cbasQuery("select count(*) from GleambookMessage", 1);
             assertTrue(false);
         }
         catch (RuntimeException e) {
