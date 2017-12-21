@@ -60,7 +60,7 @@ public class LoadTarget {
     }
 
     private TargetInfo targetInfo;
-    private CouchbaseEnvironment env;
+    private static CouchbaseEnvironment env = DefaultCouchbaseEnvironment.create();
     private Cluster cluster;
     private Bucket bucket;
     protected long timeout;
@@ -74,7 +74,6 @@ public class LoadTarget {
 
     public LoadTarget(TargetInfo targetInfo) {
         this.targetInfo = targetInfo;
-        this.env = DefaultCouchbaseEnvironment.builder().ioPoolSize(512).computationPoolSize(512).build();
         this.timeout = env.kvTimeout();
         if (targetInfo.host.equals("")) {
             this.cluster = null;
