@@ -248,6 +248,13 @@ public class LoadTarget {
                     System.out.println(this.getCurrentTime() + "+++ new timeout " + timeout + " +++");
                 } else {
                     System.out.println(this.getCurrentTime() + "+++ throw " + e.toString() + " +++");
+                    try {
+                        Thread.sleep(this.timeout);
+                    }
+                    catch (InterruptedException ie) {
+                        System.err.println(e.toString());
+                        System.exit(-1);
+                    }
                     throw e;
                 }
             }
