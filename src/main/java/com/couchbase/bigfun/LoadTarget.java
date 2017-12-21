@@ -74,7 +74,7 @@ public class LoadTarget {
 
     public LoadTarget(TargetInfo targetInfo) {
         this.targetInfo = targetInfo;
-        this.env = DefaultCouchbaseEnvironment.create();
+        this.env = DefaultCouchbaseEnvironment.builder().ioPoolSize(512).computationPoolSize(512).build();
         this.timeout = env.kvTimeout();
         if (targetInfo.host.equals("")) {
             this.cluster = null;
